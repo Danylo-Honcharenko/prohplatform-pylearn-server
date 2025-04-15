@@ -1,13 +1,8 @@
 package org.ua.fkrkm.progplatform.function;
 
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
 import org.ua.fkrkm.proglatformdao.dao.UserDaoI;
-import org.ua.fkrkm.proglatformdao.entity.Role;
 import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
-import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
-import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 
 import java.util.function.Function;
 
