@@ -29,6 +29,7 @@ import org.ua.fkrkm.progplatform.utils.AuthChain;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -97,16 +98,22 @@ public class UserServiceImpl implements UserServiceI {
      */
     @Override
     public LogoutResponse logout(HttpServletRequest request) {
-        boolean isRemoved = false;
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(cookiesTokenName)) {
-                String token = cookie.getValue();
-                authDao.deleteByAccessToken(token);
-                isRemoved = true;
-            }
+        // Перевіряємо що cookie встановлені
+        if (cookies == null) return new LogoutResponse("TOKEN NO CONTAINED IN COOKIES!");
+        Optional<Cookie> optionalCookie = Stream.of(cookies)
+                // Намагаємось знайти cookie за ім'ям
+                .filter(cookie -> cookie.getName().equals(cookiesTokenName))
+                .findFirst();
+        boolean isCookiePresent = optionalCookie.isPresent();
+        // Перевіряємо що потрібний cookie встановлено
+        if (isCookiePresent) {
+            Cookie cookie = optionalCookie.get();
+            String token = cookie.getValue();
+            // Видаляємо токен з бази
+            authDao.deleteByAccessToken(token);
         }
-        return new LogoutResponse(isRemoved ? "LOGOUT" : "TOKEN NO CONTAINED IN COOKIES!");
+        return new LogoutResponse(isCookiePresent ? "LOGOUT" : "CANNOT LOGOUT!");
     }
 
     /**
