@@ -10,6 +10,7 @@ import org.ua.fkrkm.proglatformdao.entity.Course;
 import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.CourseView;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.utils.Msid;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
@@ -99,7 +100,7 @@ public class CourseServiceImpl implements CourseServiceI {
             courseDao.delete(id);
             return new DeleteCourseResponse(id);
         } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.COURSE_NOT_FOUND);
+            throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         }
     }
 
@@ -182,7 +183,7 @@ public class CourseServiceImpl implements CourseServiceI {
             List<Integer> courseUsersId = courseDao.getCourseUsersIdByCourseId(course.getId());
             return courseUsersId.contains(userId);
         } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.COURSE_NOT_FOUND);
+            throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         }
     }
 
@@ -197,7 +198,7 @@ public class CourseServiceImpl implements CourseServiceI {
             return userId != null ? courseResponseCourseConverter.convert(course, userId)
                     : courseResponseCourseConverter.convert(course);
         } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.COURSE_NOT_FOUND);
+            throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         }
     }
 
@@ -222,7 +223,7 @@ public class CourseServiceImpl implements CourseServiceI {
         try {
             return courseDao.getById(courseId);
         } catch (IncorrectResultSizeDataAccessException ex) {
-            throw new ProgPlatformException(ErrorConsts.COURSE_NOT_FOUND);
+            throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         }
     }
 }

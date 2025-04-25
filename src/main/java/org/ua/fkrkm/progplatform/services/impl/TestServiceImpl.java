@@ -11,6 +11,7 @@ import org.ua.fkrkm.proglatformdao.entityMongo.Question;
 import org.ua.fkrkm.proglatformdao.entityMongo.Test;
 import org.ua.fkrkm.proglatformdao.entityMongo.view.AnswerView;
 import org.ua.fkrkm.proglatformdao.entityMongo.view.TestView;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.converters.AnswerViewToQuestion;
@@ -75,7 +76,7 @@ public class TestServiceImpl implements TestServiceI {
     public GetTestResponse getTestByUUID(String uuid) {
         // Отримуємо тест по UUID
         Test test = testDao.getByUUID(uuid);
-        if (test == null) throw new ProgPlatformException(ErrorConsts.TEST_NOT_FOUND);
+        if (test == null) throw new ProgPlatformNotFoundException(ErrorConsts.TEST_NOT_FOUND);
         return testGetTestResponseConverter.convert(test);
     }
 
@@ -97,7 +98,7 @@ public class TestServiceImpl implements TestServiceI {
     public CheckTestAnswersResultResponse check(CheckTestAnswersRequest request) {
         // Отримуємо тест по UUID
         Test test = testDao.getByUUID(request.getUuid());
-        if (test == null) throw new ProgPlatformException(ErrorConsts.TEST_NOT_FOUND);
+        if (test == null) throw new ProgPlatformNotFoundException(ErrorConsts.TEST_NOT_FOUND);
         // Отримуємо запитання та відповіді з бази
         List<Question> originalQuestions = test.getQuestions();
         int maxAssessment = originalQuestions.size();

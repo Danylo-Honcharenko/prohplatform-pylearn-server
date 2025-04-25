@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
 import org.ua.fkrkm.proglatformdao.dao.UserDaoI;
 import org.ua.fkrkm.proglatformdao.dao.impl.AuthDaoImpl;
@@ -51,14 +52,12 @@ public class UserServiceTest {
     private final Converter<User, CurrentUserResponse> currentUserResponseConverter = mock(UserToCurrentUserResponse.class);
 
     @BeforeEach
-    public void setUp() throws NoSuchFieldException, IllegalAccessException {
+    public void setUp() {
         this.userService = new UserServiceImpl(userDao, roleDao, userRegistrationRequestUserConverter,
                 createUserResponseConverter, jwtService, passwordEncoder, authUserService,
                 mock(UserToUpdateUserResponse.class), currentUserResponseConverter, mock(UserToUserViewExt.class), mock(AuthDaoImpl.class));
 
-        Field cookiesTokenName = UserServiceImpl.class.getDeclaredField("cookiesTokenName");
-        cookiesTokenName.setAccessible(true);
-        cookiesTokenName.set(userService, "accessToken");
+        ReflectionTestUtils.setField(userService, "cookiesTokenName", "accessToken");
     }
 
     @Test

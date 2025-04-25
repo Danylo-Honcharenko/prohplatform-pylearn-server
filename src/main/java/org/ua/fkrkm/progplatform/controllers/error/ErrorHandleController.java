@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.utils.Msid;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
@@ -53,6 +54,21 @@ public class ErrorHandleController {
         LOGGER.error("MSID: {}, Повідомлення помилки: {}", Msid.get(), ex.getMessage(), ex);
         return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR, new ErrorResponse(
                 "Error", ex.getMessage(), Msid.get()
+        ));
+    }
+
+    /**
+     * Не знайдено
+     *
+     * @param ex помилка
+     * @return Response<ErrorResponse> відповідь API
+     */
+    @ExceptionHandler(value = ProgPlatformNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Response<ErrorResponse> errorProgNotFound(ProgPlatformNotFoundException ex) {
+        LOGGER.error("MSID: {}, Повідомлення помилки: {}", Msid.get(), ex.getMessage(), ex);
+        return new Response<>(HttpStatus.NOT_FOUND, new ErrorResponse(
+                "Not found", ex.getMessage(), Msid.get()
         ));
     }
 

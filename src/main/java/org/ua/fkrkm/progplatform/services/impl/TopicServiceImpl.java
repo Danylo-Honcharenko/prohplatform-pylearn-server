@@ -8,6 +8,7 @@ import org.ua.fkrkm.proglatformdao.dao.ModuleDaoI;
 import org.ua.fkrkm.proglatformdao.dao.TopicDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Topic;
 import org.ua.fkrkm.proglatformdao.entity.User;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
@@ -86,7 +87,7 @@ public class TopicServiceImpl implements TopicServiceI {
             topicDao.update(topic);
             return topicToUpdateTopicResponseConverter.convert(topic);
         } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.DATA_NOT_FOUND);
+            throw new ProgPlatformNotFoundException(ErrorConsts.DATA_NOT_FOUND);
         }
     }
 
@@ -109,7 +110,7 @@ public class TopicServiceImpl implements TopicServiceI {
             List<Topic> courseTopics = topicDao.findAllTopicsByModuleId(moduleId);
             return new GetAllCourseModules(courseTopics);
         } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.MODULE_NOT_FOUND);
+            throw new ProgPlatformNotFoundException(ErrorConsts.MODULE_NOT_FOUND);
         }
     }
 
@@ -123,7 +124,7 @@ public class TopicServiceImpl implements TopicServiceI {
             Topic topic = topicDao.getById(topicId);
             return topicResponseTopicConverter.convert(topic);
         } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.TOPIC_NOT_FOUND);
+            throw new ProgPlatformNotFoundException(ErrorConsts.TOPIC_NOT_FOUND);
         }
     }
 }

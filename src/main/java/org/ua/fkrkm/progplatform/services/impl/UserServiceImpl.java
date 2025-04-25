@@ -19,6 +19,7 @@ import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 import org.ua.fkrkm.progplatform.services.UserServiceI;
@@ -155,7 +156,7 @@ public class UserServiceImpl implements UserServiceI {
         // Отримуємо користувача по параметрам
         List<User> users = userDao.findByParams(id, firstName, lastName, email);
         // Перевіряємо що користувач існує
-        if (users.isEmpty()) throw new ProgPlatformException(ErrorConsts.USER_NOT_FOUND);
+        if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         User user = users.getFirst();
         Role role = roleDao.getById(user.getRoleId());
         return new UserResponse(user.getId(), user.getFirst_name(), user.getLast_name(), user.getEmail(), role.getName());
@@ -178,7 +179,7 @@ public class UserServiceImpl implements UserServiceI {
             userDao.delete(id);
             return new DeleteUserResponse(id);
         } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.USER_NOT_FOUND);
+            throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         }
     }
 
@@ -206,7 +207,7 @@ public class UserServiceImpl implements UserServiceI {
         Integer roleId = roleDao.findIdByName(request.getRoleName())
                 .getFirst();
         // Перевіряємо що роль існує
-        if (roleId == null) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
+        if (roleId == null) throw new ProgPlatformNotFoundException(ErrorConsts.ROLE_NOT_FOUND);
         Role newRole = roleDao.getById(roleId);
         Role oldRole = roleDao.getById(user.getRoleId());
         // Встановлюємо ID нової ролі
