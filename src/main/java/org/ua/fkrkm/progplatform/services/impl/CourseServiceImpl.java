@@ -8,10 +8,8 @@ import org.ua.fkrkm.proglatformdao.dao.CourseDaoI;
 import org.ua.fkrkm.proglatformdao.dao.UserDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Course;
 import org.ua.fkrkm.proglatformdao.entity.User;
-import org.ua.fkrkm.proglatformdao.entity.view.CourseView;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
-import org.ua.fkrkm.progplatform.utils.Msid;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.converters.CourseToCourseResponse;
@@ -41,8 +39,6 @@ public class CourseServiceImpl implements CourseServiceI {
     private final Converter<Course, CreateCourseResponse> createCourseResponseCourseConverter;
     // Сервіс для роботи з поточним користувачем в системі
     private final AuthUserServiceI authUserService;
-    // Конвертор
-    private final Converter<Course, CourseView> courseViewCourseConverter;
     // Конвертор
     private final CourseToCourseResponse courseResponseCourseConverter;
 
@@ -109,8 +105,8 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public GetAllCoursesResponse getAllCourses() {
-        List<CourseView> courses = courseDao.getAll().stream()
-                .map(courseViewCourseConverter::convert)
+        List<CourseResponse> courses = courseDao.getAll().stream()
+                .map(courseResponseCourseConverter::convert)
                 .toList();
         return new GetAllCoursesResponse(courses);
     }
