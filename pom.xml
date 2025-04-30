@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>org.ua.fkrkm</groupId>
-    <artifactId>ProgPlatform</artifactId>
+    <artifactId>progplatform</artifactId>
     <description>Сервер платформи для вивчення мов програмування</description>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
@@ -71,11 +71,6 @@
             <version>2.6.0</version>
         </dependency>
         <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.8.0</version>
-        </dependency>
-        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.11.5</version>
@@ -112,6 +107,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <pluginManagement>
             <plugins>
                 <plugin>

@@ -32,6 +32,7 @@ public class SecurityConfig {
     private final CorsConfig corsConfig;
 
     private static final String[] PERMIT_ALL = {
+            "/",
             "/swagger-ui/**",
             "/v3/api-docs*/**",
             "/api/user/registration",

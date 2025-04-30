@@ -31,8 +31,8 @@ import java.util.List;
 /**
  * Фільтр для аутентифікації запиту
  */
-@Component
 @Order(2)
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Сервіс для роботи з Jwt токеном
