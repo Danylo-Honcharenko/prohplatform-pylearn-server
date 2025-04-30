@@ -17,7 +17,7 @@
     <packaging>war</packaging>
 
     <properties>
-        <java.version>22</java.version>
+        <java.version>21</java.version>
         <progplatform.dao.version>1.0-DEV</progplatform.dao.version>
         <progplatform.client.lib.version>1.0-DEV</progplatform.client.lib.version>
     </properties>
