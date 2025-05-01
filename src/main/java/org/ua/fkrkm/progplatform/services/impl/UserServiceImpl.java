@@ -30,7 +30,6 @@ import org.ua.fkrkm.progplatform.utils.AuthChain;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -63,11 +62,14 @@ public class UserServiceImpl implements UserServiceI {
     private final Converter<User, CurrentUserResponse> currentUserResponseConverter;
     // Конвертор
     private final Converter<User, UserView> userViewExtConverter;
-
+    // DAO для роботи з аунтифікованими користувачами
     private final AuthDaoI authDao;
-
+    // Ім'я кукі з JWT токеном
     @Value("${cookies.jwt.token.name}")
     private String cookiesTokenName;
+    // Поточний домен
+    @Value("${my.server.domain}")
+    private String domain;
 
     /**
      * {@inheritDoc}
@@ -91,7 +93,7 @@ public class UserServiceImpl implements UserServiceI {
                 // Перевіряємо хеш пароля
                 .check(new ValidatePasswordHash(passwordEncoder, userDao))
                 // Генеруємо Jwt токен і готуємо відповідь для клієнта
-                .get(new GenerateJwtTokenAndPrepareResponse(jwtService, userDao, roleDao, cookiesTokenName, response, authDao));
+                .get(new GenerateJwtTokenAndPrepareResponse(jwtService, userDao, roleDao, cookiesTokenName, response, authDao, domain));
     }
 
     /**

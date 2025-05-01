@@ -36,8 +36,10 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
     private final String cookiesTokenName;
     // Сервлет відповіді
     private final HttpServletResponse response;
-
+    // DAO для роботи з аунтифікованими користувачами
     private final AuthDaoI authDao;
+    // Поточний домен
+    private final String domain;
 
     /**
      * Конструктор
@@ -46,6 +48,8 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @param userDao DAO для роботи з користувачами
      * @param roleDao DAO для роботи з ролями
      * @param cookiesTokenName назва cookie з токеном
+     * @param authDao DAO для роботи з аунтифікованими користувачами
+     * @param domain поточний домен
      * @param response відповідь
      */
     public GenerateJwtTokenAndPrepareResponse(JwtServiceI jwtService,
@@ -53,13 +57,15 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
                                               RoleDaoI roleDao,
                                               String cookiesTokenName,
                                               HttpServletResponse response,
-                                              AuthDaoI authDao) {
+                                              AuthDaoI authDao,
+                                              String domain) {
         this.jwtService = jwtService;
         this.userDao = userDao;
         this.roleDao = roleDao;
         this.cookiesTokenName = cookiesTokenName;
         this.response = response;
         this.authDao = authDao;
+        this.domain = domain;
     }
 
     @Override
@@ -106,7 +112,7 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
         cookie.setMaxAge(36000);
         cookie.setSecure(false);
         cookie.setHttpOnly(true);
-        cookie.setDomain("localhost");
+        cookie.setDomain(domain);
         cookie.setPath("/");
 
         response.addCookie(cookie);
