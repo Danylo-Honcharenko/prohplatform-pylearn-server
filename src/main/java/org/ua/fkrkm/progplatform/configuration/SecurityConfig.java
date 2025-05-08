@@ -40,7 +40,8 @@ public class SecurityConfig {
             "/api/course/**",
             "/api/test/**",
             "/api/topic/**",
-            "/api/module/**"
+            "/api/module/**",
+            "/api/user/updatePassword"
     };
 
     private static final String[] PERMIT_ADMIN = {

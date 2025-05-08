@@ -45,6 +45,13 @@ public interface UserServiceI {
      */
     UpdateUserResponse update(UpdateUserRequest request);
     /**
+     * Оновлення пароля користувача
+     *
+     * @param request запит
+     * @return ChangePasswordResponse відповідь API
+     */
+    ChangePasswordResponse changePassword(ChangePasswordRequest request);
+    /**
      * Отримання користувача по заданим параметрам
      *
      * @param id ID користувача

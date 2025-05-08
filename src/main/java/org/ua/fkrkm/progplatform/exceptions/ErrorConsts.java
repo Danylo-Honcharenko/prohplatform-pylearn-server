@@ -70,4 +70,12 @@ public class ErrorConsts {
             "ru", "Невозможно удалить другого пользователя, кроме вас самих!",
             "en", "It is impossible to delete another user except yourself!"
     ));
+    /**
+     * Неправильно вказано пароль
+     */
+    public final static ErrorCfg PASSWORD_IS_INCORRECT = new ErrorCfg(Map.of(
+            "uk", "Неправильно вказано пароль!",
+            "ru", "Не верно указан пароль!",
+            "en", "The password is incorrect!"
+    ));
 }

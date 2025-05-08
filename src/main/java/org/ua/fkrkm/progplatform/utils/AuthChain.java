@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.utils;
 
+import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformExceptionBadRequest;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
@@ -53,7 +55,7 @@ public class AuthChain {
      */
     public AuthChain check(Predicate<UserLoginRequest> predicate) {
         boolean test = predicate.test(user);
-        if (!test) throw new ProgPlatformException("Неправильний пароль!");
+        if (!test) throw new ProgPlatformExceptionBadRequest(ErrorConsts.PASSWORD_IS_INCORRECT);
         return this;
     }
 

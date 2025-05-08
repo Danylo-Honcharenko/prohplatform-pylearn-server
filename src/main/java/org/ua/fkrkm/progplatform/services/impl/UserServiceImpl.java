@@ -19,6 +19,7 @@ import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformExceptionBadRequest;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
@@ -137,17 +138,34 @@ public class UserServiceImpl implements UserServiceI {
         // Отримуємо сутність поточного користувача в системі
         User user = authUserService.getCurrentAuthUser();
 
-        // Заповнюємо сутність оновленими даними якщо вони присутні
+        // Заповнюємо сутність оновленими даними, якщо вони присутні
         Optional.ofNullable(request.getFirstName()).filter(e -> !e.isBlank()).ifPresent(user::setFirst_name);
         Optional.ofNullable(request.getLastName()).filter(e -> !e.isBlank()).ifPresent(user::setLast_name);
         Optional.ofNullable(request.getEmail()).filter(e -> !e.isBlank()).ifPresent(user::setEmail);
-        Optional.ofNullable(request.getPassword()).filter(e -> !e.isBlank())
-                .ifPresent(passwd -> user.setPassword(passwordEncoder.encode(passwd)));
 
         user.setUpdated(new Date());
         // Оновлюємо користувача в базі
         userDao.update(user);
         return updateUserResponseConverter.convert(user);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ChangePasswordResponse changePassword(ChangePasswordRequest request) {
+        // Намагаємось отримати користувача по email
+        List<User> users = userDao.findByEmail(request.getEmail());
+        // Перевіряємо, що такий користувач є
+        if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
+        User user = users.getFirst();
+        // Перевіряємо переданий пароль з паролем у базі
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) throw new ProgPlatformExceptionBadRequest(ErrorConsts.PASSWORD_IS_INCORRECT);
+        // Хешуємо та зберігаємо новий пароль
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        // Оновлюємо сутність у базі
+        userDao.update(user);
+        return new ChangePasswordResponse();
     }
 
     /**

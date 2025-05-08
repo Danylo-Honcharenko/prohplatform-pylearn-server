@@ -113,6 +113,26 @@ public class UserController {
     }
 
     /**
+     * Оновити пароль користувача
+     *
+     * @param request запит
+     * @return Response<ChangePasswordResponse> відповідь API
+     */
+    @Operation(
+            summary = "Оновити пароль користувача"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UpdateUserResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "BAD_REQUEST", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FieldValidResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+    })
+    @ResponseBody
+    @PutMapping("/updatePassword")
+    public Response<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        return new Response<>(HttpStatus.OK, userService.changePassword(request));
+    }
+
+    /**
      * Отримати інформацію про поточного користувача в системі
      *
      * @return Response<CurrentUserResponse> відповідь API
