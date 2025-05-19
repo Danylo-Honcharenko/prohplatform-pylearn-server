@@ -3,14 +3,9 @@ package org.ua.fkrkm.progplatform.converters;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import org.ua.fkrkm.proglatformdao.dao.ModuleDaoI;
-import org.ua.fkrkm.proglatformdao.dao.ModuleStatDaoI;
-import org.ua.fkrkm.proglatformdao.dao.TestDaoI;
-import org.ua.fkrkm.proglatformdao.dao.TopicDaoI;
-import org.ua.fkrkm.proglatformdao.entity.Course;
+import org.ua.fkrkm.proglatformdao.dao.*;
+import org.ua.fkrkm.proglatformdao.entity.*;
 import org.ua.fkrkm.proglatformdao.entity.Module;
-import org.ua.fkrkm.proglatformdao.entity.ModuleStat;
-import org.ua.fkrkm.proglatformdao.entity.Topic;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleView;
 import org.ua.fkrkm.proglatformdao.entity.view.TopicView;
 import org.ua.fkrkm.proglatformdao.entityMongo.Question;
@@ -37,6 +32,8 @@ public class CourseToCourseResponse implements Converter<Course, CourseResponse>
     private final ModuleDaoI moduleDao;
     // DAO для роботи зі статистикой по модулю
     private final ModuleStatDaoI moduleStatDao;
+    // DAO для роботи із завданнями
+    private final ExerciseDaoI exerciseDao;
 
     @Override
     public CourseResponse convert(Course source) {
@@ -153,12 +150,16 @@ public class CourseToCourseResponse implements Converter<Course, CourseResponse>
                 .map(this::testToTestView)
                 .toList();
 
+        List<Exercise> exercises = exerciseDao.findExercisesByTopicId(topic.getId());
+
         return TopicView.builder()
                 .id(topic.getId())
                 .name(topic.getName())
                 .description(topic.getDescription())
                 .moduleId(topic.getModuleId())
                 .tests(tests)
+                // Отримуємо лиш одне завдання
+                .exercise(exercises.isEmpty() ? null : exercises.getFirst())
                 .done(this.checkIsTopicDone(moduleStats, topic.getId()))
                 .created(topic.getCreated())
                 .updated(topic.getUpdated())
