@@ -97,20 +97,20 @@ public class CourseAdminController {
      * @param courseId ID курсу
      * @return Response<AddUserToCourseResponse> відповідь API
      */
-//    @Operation(
-//            summary = "Додати користувача до курсу"
-//    )
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AddUserToCourseResponse.class))}),
-//            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
-//    })
-//    @ResponseBody
-//    @SecurityRequirement(name = "Bearer Authentication")
-//    @PostMapping("/addUserToCourse")
-//    public Response<AddUserToCourseResponse> addUserToCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") int userId,
-//                                                             @Parameter(description = "ID курса") @RequestParam(name = "courseId") int courseId) {
-//        return new Response<>(HttpStatus.OK, courseService.addUserToCourse(userId, courseId));
-//    }
+    @Operation(
+            summary = "Додати користувача до курсу"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AddUserToCourseResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+    })
+    @ResponseBody
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PostMapping("/addUserToCourse")
+    public Response<AddUserToCourseResponse> addUserToCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") int userId,
+                                                             @Parameter(description = "ID курса") @RequestParam(name = "courseId") int courseId) {
+        return new Response<>(HttpStatus.OK, courseService.addUserToCourse(userId, courseId));
+    }
 
     /**
      * Видалити користувача з курсу
@@ -119,18 +119,18 @@ public class CourseAdminController {
      * @param courseId ID курсу
      * @return Response<DeleteUserFromCourseResponse> відповідь API
      */
-//    @Operation(
-//            summary = "Видалити користувача з курсу"
-//    )
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = DeleteUserFromCourseResponse.class))}),
-//            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
-//    })
-//    @ResponseBody
-//    @SecurityRequirement(name = "Bearer Authentication")
-//    @DeleteMapping("/deleteUserFromCourse")
-//    public Response<DeleteUserFromCourseResponse> deleteUserFromCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") int userId,
-//                                                                       @Parameter(description = "ID курса") @RequestParam(name = "courseId") int courseId) {
-//        return new Response<>(HttpStatus.OK, courseService.deleteUserFromCourse(userId, courseId));
-//    }
+    @Operation(
+            summary = "Видалити користувача з курсу"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = DeleteUserFromCourseResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+    })
+    @ResponseBody
+    @SecurityRequirement(name = "Bearer Authentication")
+    @DeleteMapping("/deleteUserFromCourse")
+    public Response<DeleteUserFromCourseResponse> deleteUserFromCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") int userId,
+                                                                       @Parameter(description = "ID курса") @RequestParam(name = "courseId") int courseId) {
+        return new Response<>(HttpStatus.OK, courseService.deleteUserFromCourse(userId, courseId));
+    }
 }
