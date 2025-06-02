@@ -115,6 +115,7 @@ public class TestServiceImpl implements TestServiceI {
         List<Question> wrongAnswers = checkedAnswers.get(false).stream()
                 .map(new AnswerViewToQuestion(originalQuestions))
                 .toList();
+        Date created = new Date();
         Gson gson = new Gson();
         // Зберігаємо результат тестування
         TestResult testResult = TestResult.builder()
@@ -124,11 +125,11 @@ public class TestServiceImpl implements TestServiceI {
                 .assessment(currentAssessment)
                 .correct(gson.toJson(correctAnswers))
                 .incorrect(gson.toJson(wrongAnswers))
-                .created(new Date())
+                .created(created)
                 .build();
         testResultDao.create(testResult);
         // Формуємо відповідь API
-        return new CheckTestAnswersResultResponse(maxAssessment, currentAssessment, correctAnswers, wrongAnswers);
+        return new CheckTestAnswersResultResponse(maxAssessment, currentAssessment, correctAnswers, wrongAnswers, created);
     }
 
     /**

@@ -49,6 +49,7 @@ public class TestResultListToTestResultsResponseResponse implements Converter<Li
                 .maxAssessment(source.getMaxAssessment())
                 .correctAnswers(this.convertStringToListAnswerView(source.getCorrect()))
                 .wrongAnswers(this.convertStringToListQuestion(source.getIncorrect()))
+                .created(source.getCreated())
                 .build();
     }
 
