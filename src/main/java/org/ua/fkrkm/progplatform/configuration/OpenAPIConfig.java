@@ -28,7 +28,7 @@ public class OpenAPIConfig {
     @Bean
     public OpenAPI getOpenAPIConfig() {
         Info info = new Info();
-        info.setTitle("ProgPlatform (PyLearn)");
+        info.setTitle("ProgPlatform");
         info.setVersion("0.0.1-SNAPSHOT");
         info.setDescription("Бекенд частина платформи для навчання мови програмування");
         return new OpenAPI().info(info);
