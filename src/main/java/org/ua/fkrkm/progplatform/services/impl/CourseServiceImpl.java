@@ -10,7 +10,7 @@ import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.function.*;
-import org.ua.fkrkm.progplatform.utils.ObjectModifire;
+import org.ua.fkrkm.progplatform.utils.ObjectModifier;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.converters.CourseToCourseResponse;
@@ -198,7 +198,7 @@ public class CourseServiceImpl implements CourseServiceI {
     public CourseResponse getCourseById(int courseId, Integer userId) {
         try {
             // Заповнюємо объект
-            return ObjectModifire.init(new CourseResponse())
+            return ObjectModifier.init(new CourseResponse())
                     // Отримуємо курс по ID та заповнюємо объект
                     .apply(new SetCourse(() -> this.courseDao.getById(courseId)))
                     // Встановлюємо модулі по ID курсу
