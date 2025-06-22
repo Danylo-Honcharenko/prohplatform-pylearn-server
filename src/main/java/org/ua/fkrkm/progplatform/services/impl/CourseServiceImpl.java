@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
-import org.ua.fkrkm.proglatformdao.dao.CourseDaoI;
-import org.ua.fkrkm.proglatformdao.dao.UserDaoI;
+import org.ua.fkrkm.proglatformdao.dao.*;
 import org.ua.fkrkm.proglatformdao.entity.Course;
 import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
+import org.ua.fkrkm.progplatform.function.*;
+import org.ua.fkrkm.progplatform.utils.ObjectModifire;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.converters.CourseToCourseResponse;
@@ -17,7 +18,6 @@ import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.CourseServiceI;
-import org.ua.fkrkm.progplatform.function.GetUserInfo;
 
 import java.util.Date;
 import java.util.List;
@@ -41,6 +41,14 @@ public class CourseServiceImpl implements CourseServiceI {
     private final AuthUserServiceI authUserService;
     // Конвертор
     private final CourseToCourseResponse courseResponseCourseConverter;
+    // DAO для роботи з модулями
+    private final ModuleDaoI moduleDao;
+    // DAO для роботи з темами
+    private final TopicDaoI topicDao;
+    // DAO для роботи зі статистикой по модулю
+    private final ModuleStatDaoI moduleStatDao;
+    // DAO для роботи з тестами
+    private final TestDaoI testDao;
 
     /**
      * {@inheritDoc}
@@ -189,10 +197,21 @@ public class CourseServiceImpl implements CourseServiceI {
     @Override
     public CourseResponse getCourseById(int courseId, Integer userId) {
         try {
-            // Отримуємо курс по ID
-            Course course = courseDao.getById(courseId);
-            return userId != null ? courseResponseCourseConverter.convert(course, userId)
-                    : courseResponseCourseConverter.convert(course);
+            // Заповнюємо объект
+            return ObjectModifire.init(new CourseResponse())
+                    // Отримуємо курс по ID та заповнюємо объект
+                    .apply(new SetCourse(() -> this.courseDao.getById(courseId)))
+                    // Встановлюємо модулі по ID курсу
+                    .apply(new SetModuleByCourseId(() -> this.moduleDao.getModulesByCourseId(courseId)))
+                    // Встановлюємо теми модулів
+                    .apply(new SetModuleTopic(this.topicDao::findAllTopicsByModuleIdList,
+                            () -> this.moduleStatDao.findModuleStatByUserId(userId)))
+                    // Встановлюємо тест
+                    .apply(new SetTopicTest(this.testDao::getByTopicIds))
+                    // Встановлюємо процент проходження модулів
+                    .apply(new SetModulePercent(() -> this.moduleStatDao.findModulesStatByUserId(userId)))
+                    // Отримуємо объект
+                    .get();
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         }
@@ -203,23 +222,7 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public UserCourseResponse getCourseByUserId(int userId) {
-        List<Course> courses = courseDao.getCoursesIdByUserId(userId).stream()
-                .map(this::getCourseById)
-                .toList();
+        List<Course> courses = courseDao.getCoursesIdByUserId(userId);
         return new UserCourseResponse(courses);
-    }
-
-    /**
-     * Отримати курс по ID
-     *
-     * @param courseId ID курсу
-     * @return Course курс
-     */
-    private Course getCourseById(int courseId) {
-        try {
-            return courseDao.getById(courseId);
-        } catch (IncorrectResultSizeDataAccessException ex) {
-            throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
-        }
     }
 }
