@@ -1,10 +1,10 @@
 package org.ua.fkrkm.progplatform.utils;
 
+import org.ua.fkrkm.progplatform.exceptions.ErrorCfg;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformExceptionBadRequest;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
-import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -12,38 +12,41 @@ import java.util.function.Predicate;
 
 /**
  * Ланцюг аутентифікації
+ *
+ * @param <T> тип об'єкта
  */
-public class AuthChain {
+public class AuthChain<T> {
     // Запит
-    private final UserLoginRequest user;
+    private final T request;
 
     /**
      * Конструктор
      *
-     * @param user запит
+     * @param request запит
      */
-    public AuthChain(UserLoginRequest user) {
-        this.user = user;
+    private AuthChain(T request) {
+        this.request = request;
     }
 
     /**
      * Метод ініціалізації
      *
-     * @param user запит
-     * @return AuthChain ланцюг аутентифікації
+     * @param request запит
+     * @param <T> типа об'єкта
+     * @return AuthChain<T> ланцюг аутентифікації
      */
-    public static AuthChain init(UserLoginRequest user) {
-        return new AuthChain(user);
+    public static <T> AuthChain<T> init(T request) {
+        return new AuthChain<>(request);
     }
 
     /**
      * Застосувати зміни до об'єкта
      *
      * @param action дія
-     * @return AuthChain ланцюг аутентифікації
+     * @return AuthChain<T> ланцюг аутентифікації
      */
-    public AuthChain apply(Consumer<UserLoginRequest> action) {
-        action.accept(user);
+    public AuthChain<T> apply(Consumer<T> action) {
+        action.accept(request);
         return this;
     }
 
@@ -51,11 +54,11 @@ public class AuthChain {
      * Перевірка умови
      *
      * @param predicate умова
-     * @return AuthChain ланцюг аутентифікації
+     * @return AuthChain<T> ланцюг аутентифікації
      */
-    public AuthChain check(Predicate<UserLoginRequest> predicate) {
-        boolean test = predicate.test(user);
-        if (!test) throw new ProgPlatformExceptionBadRequest(ErrorConsts.PASSWORD_IS_INCORRECT);
+    public AuthChain<T> check(Predicate<T> predicate, ErrorCfg error) {
+        boolean test = predicate.test(request);
+        if (!test) throw new ProgPlatformExceptionBadRequest(error);
         return this;
     }
 
@@ -65,7 +68,7 @@ public class AuthChain {
      * @param function функція перетворення об'єкта
      * @return LoginUserResponse відповідь API
      */
-    public LoginUserResponse get(Function<UserLoginRequest, LoginUserResponse> function) {
-        return function.apply(user);
+    public LoginUserResponse get(Function<T, LoginUserResponse> function) {
+        return function.apply(request);
     }
 }
