@@ -119,8 +119,8 @@ VALUES ('Sasha', 'Valentinov', 'testOper.test@icloud.com', '123456789', 1, '2024
 INSERT INTO users (first_name, last_name, email ,password, role_id, created)
 VALUES ('Andry', 'Valente', 'testOper.test@icloud.com', '123456789', 1, '2024-09-11 17:09:10');
 
-INSERT INTO users (first_name, last_name, password, role_id, created)
-VALUES ('Valera', 'Valentinov', '123456789', 2, '2024-09-11 17:09:10');
+INSERT INTO users (first_name, last_name, email ,password, role_id, created)
+VALUES ('Valera', 'Valentinov', 'admin@icloud.com', '{bcrypt}$2a$10$TKiFTmBCWJ6R8gNwl4RbnuOkIXDBNGrDLyAMGTbOvRaX7J4mVc5bu', 3, '2024-09-11 17:09:10');
 
 INSERT INTO courses (name, description, created)
 VALUES ('C++', 'This is...', '2024-8-05 12:10:44');
