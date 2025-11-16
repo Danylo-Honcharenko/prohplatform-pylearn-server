@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.dao.*;
 import org.ua.fkrkm.proglatformdao.entity.*;
 import org.ua.fkrkm.proglatformdao.entity.Module;
-import org.ua.fkrkm.proglatformdao.entity.view.ModuleStateView;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleView;
 import org.ua.fkrkm.proglatformdao.entity.view.TopicView;
 import org.ua.fkrkm.proglatformdao.entityMongo.Question;
@@ -15,7 +14,6 @@ import org.ua.fkrkm.proglatformdao.entityMongo.view.QuestionView;
 import org.ua.fkrkm.proglatformdao.entityMongo.view.TestView;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 @Component

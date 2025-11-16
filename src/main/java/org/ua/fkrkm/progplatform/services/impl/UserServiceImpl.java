@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserServiceI {
                 // Аутентифікуємо користувача
                 .apply(new Authenticate(userDao))
                 // Перевіряємо хеш пароля
-                .check(new ValidatePasswordHash(passwordEncoder, userDao), ErrorConsts.PASSWORD_IS_INCORRECT)
+                .check(new ValidatePasswordHash(passwordEncoder, userDao))
                 // Генеруємо Jwt токен і готуємо відповідь для клієнта
                 .get(new GenerateJwtTokenAndPrepareResponse(jwtService, userDao, roleDao, cookiesTokenName, response, authDao, domain));
     }
