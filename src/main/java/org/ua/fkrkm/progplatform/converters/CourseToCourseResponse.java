@@ -9,9 +9,7 @@ import org.ua.fkrkm.proglatformdao.entity.Module;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleView;
 import org.ua.fkrkm.proglatformdao.entity.view.TopicView;
 import org.ua.fkrkm.proglatformdao.entityMongo.Question;
-import org.ua.fkrkm.proglatformdao.entityMongo.Test;
 import org.ua.fkrkm.proglatformdao.entityMongo.view.QuestionView;
-import org.ua.fkrkm.proglatformdao.entityMongo.view.TestView;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 
 import java.util.*;
@@ -23,7 +21,7 @@ public class CourseToCourseResponse implements Converter<Course, CourseResponse>
     // DAO для роботи з темами
     private final TopicDaoI topicDao;
     // DAO для роботи з тестами
-    private final TestDaoI testDao;
+//    private final TestDaoI testDao;
     // DAO для роботи з модулями
     private final ModuleDaoI moduleDao;
 
@@ -105,21 +103,21 @@ public class CourseToCourseResponse implements Converter<Course, CourseResponse>
 
     }
 
-    /**
-     * Конвертор Test у TestView
-     *
-     * @param test тест
-     * @return TestView відображення тесту
-     */
-    private TestView testToTestView(Test test) {
-        return TestView.builder()
-                .uuid(test.getId())
-                .name(test.getName())
-                .questions(questionsToQuestionsView(test.getQuestions()))
-                .created(test.getCreated())
-                .updated(test.getUpdated())
-                .build();
-    }
+//    /**
+//     * Конвертор Test у TestView
+//     *
+//     * @param test тест
+//     * @return TestView відображення тесту
+//     */
+//    private TestView testToTestView(Test test) {
+//        return TestView.builder()
+//                .uuid(test.getId())
+//                .name(test.getName())
+//                .questions(questionsToQuestionsView(test.getQuestions()))
+//                .created(test.getCreated())
+//                .updated(test.getUpdated())
+//                .build();
+//    }
 
     /**
      * Конвертація List<Question> у List<QuestionView>

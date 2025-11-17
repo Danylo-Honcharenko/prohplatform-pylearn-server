@@ -125,13 +125,10 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @return String ім'я ролі
      */
     private String getRoleNameById(int id) {
-        try {
-            // Отримуємо роль по ID
-            Role role = roleDao.getById(id);
-            return role.getName();
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
-        }
+        // Отримуємо роль по ID
+        List<Role> roles = roleDao.getById(id);
+        if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
+        return roles.getFirst().getName();
     }
 
     /**

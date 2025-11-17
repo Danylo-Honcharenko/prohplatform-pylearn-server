@@ -78,4 +78,12 @@ public class ErrorConsts {
             "ru", "Не верно указан пароль!",
             "en", "The password is incorrect!"
     ));
+    /**
+     * Недостатньо прав
+     */
+    public final static ErrorCfg INSUFFICIENT_RIGHTS = new ErrorCfg(Map.of(
+            "uk", "У вас недостатньо прав для здійснення цієї дії!",
+            "ru", "У вас недостаточно прав для совершения этого действия!",
+            "en", "You do not have sufficient rights to perform this action!"
+    ));
 }

@@ -105,7 +105,7 @@ public class UserServiceTest {
                 .thenReturn("token");
 
         when(roleDao.getById(anyInt()))
-                .thenReturn(role);
+                .thenReturn(List.of(role));
 
         UserLoginRequest userLoginRequest = UserLoginRequest.builder()
                 .email("email@email.com")

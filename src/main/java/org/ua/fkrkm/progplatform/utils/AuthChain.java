@@ -4,7 +4,6 @@ import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformExceptionBadRequest;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
-import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -13,7 +12,7 @@ import java.util.function.Predicate;
 /**
  * Ланцюг аутентифікації
  */
-public class AuthChain extends ChainModifier<UserLoginRequest> {
+public class AuthChain extends ObjectModifier<UserLoginRequest> {
     // Запит
     private final UserLoginRequest user;
 

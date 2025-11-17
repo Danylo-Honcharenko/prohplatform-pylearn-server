@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.function;
 
+import org.springframework.util.CollectionUtils;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleStateView;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleView;
 import org.ua.fkrkm.progplatformclientlib.response.CourseResponse;
@@ -21,7 +22,7 @@ public class SetModulePercent implements Consumer<CourseResponse> {
     @Override
     public void accept(CourseResponse courseResponse) {
         List<ModuleView> modules = courseResponse.getModules();
-        if (!modules.isEmpty()) {
+        if (!CollectionUtils.isEmpty(modules)) {
             List<ModuleView> moduleViews = modules.stream()
                     .map(this::setModuleCompletePercent)
                     .toList();

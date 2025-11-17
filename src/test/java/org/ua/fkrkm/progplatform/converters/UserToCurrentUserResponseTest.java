@@ -59,7 +59,7 @@ public class UserToCurrentUserResponseTest {
                 .thenReturn(List.of(testResult));
 
         when(roleDao.getById(anyInt()))
-                .thenReturn(Role.builder().name("ROLE_USER").build());
+                .thenReturn(List.of(Role.builder().name("ROLE_USER").build()));
 
         CurrentUserResponse userResponse = currentUserResponseConverter.convert(user);
         assertEquals("Програміст-любитель", userResponse.getLevelAlias());

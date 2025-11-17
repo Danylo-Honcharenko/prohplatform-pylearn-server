@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.function;
 
+import org.springframework.util.CollectionUtils;
 import org.ua.fkrkm.proglatformdao.entity.ModuleStat;
 import org.ua.fkrkm.proglatformdao.entity.Topic;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleView;
@@ -26,7 +27,7 @@ public class SetModuleTopic implements Consumer<CourseResponse> {
     @Override
     public void accept(CourseResponse courseResponse) {
         List<ModuleView> modules = courseResponse.getModules();
-        if (!modules.isEmpty()) {
+        if (!CollectionUtils.isEmpty(modules)) {
             List<Integer> modulesIds = modules.stream()
                     .map(ModuleView::getId)
                     .toList();

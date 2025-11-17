@@ -2,7 +2,6 @@ package org.ua.fkrkm.progplatform.services.impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.*;
 import org.ua.fkrkm.proglatformdao.entity.Course;
@@ -76,18 +75,20 @@ public class CourseServiceImpl implements CourseServiceI {
         // Отримуємо ID користувача
         Integer userId = currentAuthUser.getId();
         boolean userExistsInCourse = checkIfUserExistsInCourse(request.getId(), userId);
-        // Перевіряємо що поточний користувач є в списку користувачів курсу
+        // Перевіряємо, що поточний користувач є в списку користувачів курсу
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
-            throw new ProgPlatformException(String.format("Користувач з ID: %s не є участником цього курсу!", userId));
+            throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Отримуємо курс по ID
-        Course course = courseDao.getById(request.getId());
+        List<Course> courses = courseDao.getById(request.getId());
+        if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
+        Course course = courses.getFirst();
 
-        // Заповнюємо оновлені дані якщо вони є
+        // Заповнюємо оновлені дані, якщо вони є
         Optional.ofNullable(request.getName()).filter(s -> !s.isBlank()).ifPresent(course::setName);
         Optional.ofNullable(request.getDescription()).filter(s -> !s.isBlank()).ifPresent(course::setDescription);
 
         course.setUpdated(new Date());
-        // Оновлюємо запис в базі
+        // Оновлюємо запис у базі
         courseDao.update(course);
         return new UpdateCourseResponse(course.getId(), course.getName(), course.getDescription(), course.getUpdated());
     }
@@ -97,15 +98,12 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public DeleteCourseResponse delete(int id) {
-        try {
-            // Перевіряємо що курс існує
-            courseDao.getById(id);
-            // Видаляємо сам курс
-            courseDao.delete(id);
-            return new DeleteCourseResponse(id);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
-        }
+        // Перевіряємо, що курс існує
+        List<Course> courses = courseDao.getById(id);
+        if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
+        // Видаляємо сам курс
+        courseDao.delete(id);
+        return new DeleteCourseResponse(id);
     }
 
     /**
@@ -129,12 +127,15 @@ public class CourseServiceImpl implements CourseServiceI {
         // Отримуємо ID користувача
         Integer userId = currentAuthUser.getId();
         boolean userExistsInCourse = checkIfUserExistsInCourse(courseId, userId);
-        // Перевіряємо що поточний користувач є в цьому списку
+        // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
-            throw new ProgPlatformException(String.format("Користувач з ID: %s не є участником цього курсу!", userId));
+            throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
 
         // Отримуємо курс по ID
-        Course course = courseDao.getById(courseId);
+        List<Course> courses = courseDao.getById(courseId);
+        if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
+        Course course = courses.getFirst();
+
         List<Integer> courseUsersId = courseDao.getCourseUsersIdByCourseId(courseId);
         // Формуємо список користувачів
         List<UserView> users = courseUsersId.stream()
@@ -149,13 +150,10 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public AddUserToCourseResponse addUserToCourse(int userId, int courseId) {
-        // Отримуємо поточного користувача в системі
-        User currentAuthUser = authUserService.getCurrentAuthUser();
-        Integer userCreatorId = currentAuthUser.getId();
         boolean userExistsInCourse = checkIfUserExistsInCourse(courseId, userId);
-        // Перевіряємо що поточний користувач є в цьому списку
+        // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
-            throw new ProgPlatformException("Користувач з ID: " + userCreatorId + " не є участником цього курсу!");
+            throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Додаємо користувача до курсу
         courseDao.addUserToCourse(courseId, userId);
         return new AddUserToCourseResponse(courseId, userId);
@@ -167,9 +165,9 @@ public class CourseServiceImpl implements CourseServiceI {
     @Override
     public DeleteUserFromCourseResponse deleteUserFromCourse(int userId, int courseId) {
         boolean userExistsInCourse = checkIfUserExistsInCourse(courseId, userId);
-        // Перевіряємо що поточний користувач є в цьому списку
+        // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse)
-            throw new ProgPlatformException(String.format("Користувач з ID: %s не є участником цього курсу!", userId));
+            throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Видаляємо користувача з курсу
         courseDao.removeUserFromCourse(courseId, userId);
         return new DeleteUserFromCourseResponse(userId);
@@ -180,15 +178,13 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public boolean checkIfUserExistsInCourse(int courseId, int userId) {
-        try {
-            // Отримуємо курс по ID
-            Course course = courseDao.getById(courseId);
-            // Отримуємо список ID користувачів по ID курсу
-            List<Integer> courseUsersId = courseDao.getCourseUsersIdByCourseId(course.getId());
-            return courseUsersId.contains(userId);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
-        }
+        // Отримуємо курс по ID
+        List<Course> courses = courseDao.getById(courseId);
+        if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
+        Course course = courses.getFirst();
+        // Отримуємо список ID користувачів по ID курсу
+        List<Integer> courseUsersId = courseDao.getCourseUsersIdByCourseId(course.getId());
+        return courseUsersId.contains(userId);
     }
 
     /**
@@ -196,25 +192,21 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public CourseResponse getCourseById(int courseId, Integer userId) {
-        try {
-            // Заповнюємо объект
-            return ObjectModifier.init(new CourseResponse())
-                    // Отримуємо курс по ID та заповнюємо объект
-                    .apply(new SetCourse(() -> this.courseDao.getById(courseId)))
-                    // Встановлюємо модулі по ID курсу
-                    .apply(new SetModuleByCourseId(() -> this.moduleDao.getModulesByCourseId(courseId)))
-                    // Встановлюємо теми модулів
-                    .apply(new SetModuleTopic(this.topicDao::findAllTopicsByModuleIdList,
-                            () -> this.moduleStatDao.findModuleStatByUserId(userId)))
-                    // Встановлюємо тест
-                    .apply(new SetTopicTest(this.testDao::getByTopicIds))
-                    // Встановлюємо процент проходження модулів
-                    .apply(new SetModulePercent(() -> this.moduleStatDao.findModulesStatByUserId(userId)))
-                    // Отримуємо объект
-                    .get();
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
-        }
+        // Заповнюємо объект
+        return ObjectModifier.init(new CourseResponse())
+                // Отримуємо курс по ID та заповнюємо объект
+                .apply(new SetCourse(() -> this.courseDao.getById(courseId)))
+                // Встановлюємо модулі по ID курсу
+                .apply(new SetModuleByCourseId(() -> this.moduleDao.getModulesByCourseId(courseId)))
+                // Встановлюємо теми модулів
+                .apply(new SetModuleTopic(this.topicDao::findAllTopicsByModuleIdList,
+                        () -> this.moduleStatDao.findModuleStatByUserId(userId)))
+                // Встановлюємо тест
+//                    .apply(new SetTopicTest(this.testDao::getByTopicIds))
+                // Встановлюємо процент проходження модулів
+                .apply(new SetModulePercent(() -> this.moduleStatDao.findModulesStatByUserId(userId)))
+                // Отримуємо объект
+                .get();
     }
 
     /**

@@ -11,6 +11,8 @@ import org.ua.fkrkm.proglatformdao.entity.view.UserView;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 
+import java.util.List;
+
 /**
  * Конвертація "User" в "UserViewExt"
  */
@@ -40,11 +42,9 @@ public class UserToUserViewExt implements Converter<User, UserView> {
      * @return String ім'я олі
      */
     private String getRoleNameById(int id) {
-        try {
-            Role role = roleDao.getById(id);
-            return role.getName();
-        } catch (IncorrectResultSizeDataAccessException ex) {
-            throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
-        }
+        List<Role> roles = roleDao.getById(id);
+        if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
+        Role role = roles.getFirst();
+        return role.getName();
     }
 }

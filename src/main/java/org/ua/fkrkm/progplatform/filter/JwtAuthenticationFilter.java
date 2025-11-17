@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -55,6 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/progplatform/",
             "/**/api/user/registration",
             "/**/api/user/login",
+            "/**/api/user/updatePassword",
             "/**/api/course/getAll",
             "/**/swagger-ui/**",
             "/**/v3/api-docs/**"
@@ -71,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     public JwtAuthenticationFilter(JwtServiceI jwtService,
                                    UserDetailsService userDetailsService,
-                                   HandlerExceptionResolver handlerExceptionResolver,
+                                   @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver,
                                    @Value("${cookies.jwt.token.name}") String cookiesTokenName,
                                    AuthDaoI authDao) {
         this.jwtService = jwtService;

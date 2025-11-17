@@ -13,6 +13,8 @@ import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class UserToCurrentUserResponse implements Converter<User, CurrentUserResponse> {
@@ -44,13 +46,10 @@ public class UserToCurrentUserResponse implements Converter<User, CurrentUserRes
      * @return String ім'я ролі
      */
     private String getRoleNameById(int id) {
-        try {
-            // Отримуємо роль по ID
-            Role role = roleDao.getById(id);
-            return role.getName();
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
-        }
+        List<Role> roles = roleDao.getById(id);
+        if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
+        Role role = roles.getFirst();
+        return role.getName();
     }
 
     /**

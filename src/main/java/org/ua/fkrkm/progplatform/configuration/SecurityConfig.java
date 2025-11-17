@@ -16,7 +16,9 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.ua.fkrkm.progplatform.filter.JwtAuthenticationFilter;
+import org.ua.fkrkm.progplatform.filter.config.CustomAccessDeniedHandler;
 import org.ua.fkrkm.progplatform.filter.config.RestAuthenticationEntryPoint;
 
 /**
@@ -30,7 +32,6 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfig corsConfig;
-
     private static final String[] PERMIT_ALL = {
             "/",
             "/swagger-ui/**",
@@ -78,7 +79,11 @@ public class SecurityConfig {
                 .authenticationProvider(getAuthenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex ->
-                        ex.authenticationEntryPoint(new RestAuthenticationEntryPoint()))
+                        ex.authenticationEntryPoint(new RestAuthenticationEntryPoint())
+                )
+                .exceptionHandling(ex ->
+                        ex.accessDeniedHandler(new CustomAccessDeniedHandler())
+                )
                 .build();
     }
 

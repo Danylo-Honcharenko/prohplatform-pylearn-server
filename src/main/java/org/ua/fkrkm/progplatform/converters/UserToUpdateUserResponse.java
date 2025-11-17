@@ -6,7 +6,11 @@ import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Role;
 import org.ua.fkrkm.proglatformdao.entity.User;
+import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatformclientlib.response.*;
+
+import java.util.List;
 
 /**
  * Клас конвертор "User" в "UpdateUserResponse"
@@ -21,7 +25,9 @@ public class UserToUpdateUserResponse implements Converter<User, UpdateUserRespo
     @Override
     public UpdateUserResponse convert(User source) {
         // Отримуємо роль по ID
-        Role role = roleDao.getById(source.getRoleId());
+        List<Role> roles = roleDao.getById(source.getRoleId());
+        if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
+        Role role = roles.getFirst();
         return UpdateUserResponse.builder()
                 .firstName(source.getFirst_name())
                 .lastName(source.getLast_name())

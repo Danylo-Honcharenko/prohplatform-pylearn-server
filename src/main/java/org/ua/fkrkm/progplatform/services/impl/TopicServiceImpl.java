@@ -2,10 +2,10 @@ package org.ua.fkrkm.progplatform.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.ModuleDaoI;
 import org.ua.fkrkm.proglatformdao.dao.TopicDaoI;
+import org.ua.fkrkm.proglatformdao.entity.Module;
 import org.ua.fkrkm.proglatformdao.entity.Topic;
 import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
@@ -34,7 +34,7 @@ public class TopicServiceImpl implements TopicServiceI {
     private final CourseServiceI courseService;
     // DAO для роботи з темами
     private final TopicDaoI topicDao;
-    // Сервіс для роботи з поточним користувачем в системі
+    // Сервіс для роботи з поточним користувачем у системі
     private final AuthUserServiceI authUserService;
     // Конвертор
     private final Converter<CreateTopicRequest, Topic> createTopicRequestTopicConverter;
@@ -67,28 +67,26 @@ public class TopicServiceImpl implements TopicServiceI {
         // Отримуємо ID користувача
         Integer userId = currentAuthUser.getId();
         Integer courseId = request.getCourseId();
-        try {
-            if (courseId != null) {
-                boolean userExistsInCourse = courseService.checkIfUserExistsInCourse(courseId, userId);
-                // Перевіряємо що поточний користувач є в цьому списку
-                if (userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
-                    throw new ProgPlatformException("Користувач з ID: " + userId + " не є участником курсу з ID " + courseId + "!");
-            }
-            // Отримуємо тему по ID
-            Topic topic = topicDao.getById(request.getId());
-
-            // Заповнюємо оновлені дані якщо вони є
-            Optional.ofNullable(request.getName()).filter(s -> !s.isBlank()).ifPresent(topic::setName);
-            Optional.ofNullable(request.getDescription()).filter(s -> !s.isBlank()).ifPresent(topic::setDescription);
-            Optional.ofNullable(request.getCourseId()).ifPresent(topic::setModuleId);
-
-            topic.setUpdated(new Date());
-            // Оновлюємо сутність в базі
-            topicDao.update(topic);
-            return topicToUpdateTopicResponseConverter.convert(topic);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformNotFoundException(ErrorConsts.DATA_NOT_FOUND);
+        if (courseId != null) {
+            boolean userExistsInCourse = courseService.checkIfUserExistsInCourse(courseId, userId);
+            // Перевіряємо, що поточний користувач є в цьому списку
+            if (userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
+                throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
         }
+        // Отримуємо тему по ID
+        List<Topic> topics = topicDao.getById(request.getId());
+        if (topics.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.TOPIC_NOT_FOUND);
+        Topic topic = topics.getFirst();
+
+        // Заповнюємо оновлені дані якщо вони є
+        Optional.ofNullable(request.getName()).filter(s -> !s.isBlank()).ifPresent(topic::setName);
+        Optional.ofNullable(request.getDescription()).filter(s -> !s.isBlank()).ifPresent(topic::setDescription);
+        Optional.ofNullable(request.getCourseId()).ifPresent(topic::setModuleId);
+
+        topic.setUpdated(new Date());
+        // Оновлюємо сутність у базі
+        topicDao.update(topic);
+        return topicToUpdateTopicResponseConverter.convert(topic);
     }
 
     /**
@@ -105,13 +103,10 @@ public class TopicServiceImpl implements TopicServiceI {
      */
     @Override
     public GetAllCourseModules getAllModuleTopics(int moduleId) {
-        try {
-            moduleDao.getById(moduleId);
-            List<Topic> courseTopics = topicDao.findAllTopicsByModuleId(moduleId);
-            return new GetAllCourseModules(courseTopics);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformNotFoundException(ErrorConsts.MODULE_NOT_FOUND);
-        }
+        List<Module> modules = moduleDao.getById(moduleId);
+        if (modules.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.MODULE_NOT_FOUND);
+        List<Topic> courseTopics = topicDao.findAllTopicsByModuleId(moduleId);
+        return new GetAllCourseModules(courseTopics);
     }
 
     /**
@@ -119,12 +114,10 @@ public class TopicServiceImpl implements TopicServiceI {
      */
     @Override
     public TopicResponse getTopicById(int topicId) {
-        try {
-            // Отримуємо тему по ID
-            Topic topic = topicDao.getById(topicId);
-            return topicResponseTopicConverter.convert(topic);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformNotFoundException(ErrorConsts.TOPIC_NOT_FOUND);
-        }
+        // Отримуємо тему по ID
+        List<Topic> topics = topicDao.getById(topicId);
+        if (topics.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.TOPIC_NOT_FOUND);
+        Topic topic = topics.getFirst();
+        return topicResponseTopicConverter.convert(topic);
     }
 }

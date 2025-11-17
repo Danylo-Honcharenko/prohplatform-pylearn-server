@@ -8,8 +8,11 @@ import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Role;
 import org.ua.fkrkm.proglatformdao.entity.User;
+import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
+
+import java.util.List;
 
 /**
  * Клас конвертор "User" в "CreateUserResponse"
@@ -47,11 +50,12 @@ public class UserToCreateUserResponse implements Converter<User, CreateUserRespo
      * @return String назва ролі
      */
     private String getRoleName(int roleId) {
-        Role role = roleDao.getById(roleId);
-        if (role == null) {
+        List<Role> roles = roleDao.getById(roleId);
+        if (roles.isEmpty()) {
             logger.warn("Не знайдено ролі з ID: {}", roleId);
-            throw new ProgPlatformException("Не знайдено ролі з ID: " + roleId);
+            throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
         }
+        Role role = roles.getFirst();
         return role.getName();
     }
 }

@@ -16,7 +16,7 @@ public class ObjectModifier<T> {
      *
      * @param object об'єкт
      */
-    private ObjectModifier(T object) {
+    protected ObjectModifier(T object) {
         this.object = object;
     }
 

@@ -34,10 +34,10 @@ public class ValidatePasswordHash implements Predicate<UserLoginRequest> {
     public boolean test(UserLoginRequest candidate) {
         // Отримуємо користувача з бази
         List<User> users = userDao.findByEmail(candidate.getEmail());
-        // Перевіряємо що він існує
+        // Перевіряємо, що він існує
         if (users.isEmpty()) throw new ProgPlatformException(ErrorConsts.USER_NOT_FOUND);
         User user = users.getFirst();
-        // Перевіряємо що паролі з запиту і з бази однакові
+        // Перевіряємо, що паролі з запиту і з бази однакові
         return passwordEncoder.matches(candidate.getPassword(), user.getPassword());
     }
 }

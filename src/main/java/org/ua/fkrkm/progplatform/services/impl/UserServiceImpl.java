@@ -178,7 +178,9 @@ public class UserServiceImpl implements UserServiceI {
         // Перевіряємо що користувач існує
         if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         User user = users.getFirst();
-        Role role = roleDao.getById(user.getRoleId());
+        List<Role> roles = roleDao.getById(user.getRoleId());
+        if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
+        Role role = roles.getFirst();
         return new UserResponse(user.getId(), user.getFirst_name(), user.getLast_name(), user.getEmail(), role.getName());
     }
 
@@ -189,18 +191,16 @@ public class UserServiceImpl implements UserServiceI {
     public DeleteUserResponse delete(int id) {
         // Отримуємо розширену сутність поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
-        try {
-            // Отримуємо користувача по ID
-            User user = userDao.getById(id);
-            // Перевіряємо що користувач не намагається видалити іншого користувача крім себе
-            if (!user.getEmail().equals(currentAuthUser.getEmail()))
-                throw new ProgPlatformException(ErrorConsts.CANNOT_DELETE_ANOTHER_USER);
+        // Отримуємо користувача по ID
+        List<User> users = userDao.getById(id);
+        if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
+        User user = users.getFirst();
+        // Перевіряємо, що користувач не намагається видалити іншого користувача, крім себе
+        if (!user.getEmail().equals(currentAuthUser.getEmail()))
+            throw new ProgPlatformException(ErrorConsts.CANNOT_DELETE_ANOTHER_USER);
 
-            userDao.delete(id);
-            return new DeleteUserResponse(id);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
-        }
+        userDao.delete(id);
+        return new DeleteUserResponse(id);
     }
 
     /**
@@ -219,17 +219,22 @@ public class UserServiceImpl implements UserServiceI {
      */
     @Override
     public UpdateUserRoleResponse updateUserRole(UpdateUserRoleRequest request) {
-        // Перевіряємо що користувач який міняє роль адмін
-        if (!authUserService.isCurrentAuthUserAdmin()) throw new AccessDeniedException("Ви маєте бути адміном!");
-        // Отримуємо користувача якому ми змінюємо роль
-        User user = userDao.getById(request.getUserId());
-        // Отримуємо роль на яку будемо міняти
-        Integer roleId = roleDao.findIdByName(request.getRoleName())
-                .getFirst();
-        // Перевіряємо що роль існує
-        if (roleId == null) throw new ProgPlatformNotFoundException(ErrorConsts.ROLE_NOT_FOUND);
-        Role newRole = roleDao.getById(roleId);
-        Role oldRole = roleDao.getById(user.getRoleId());
+        // Перевіряємо, що користувач, який міняє роль адмін
+        if (!authUserService.isCurrentAuthUserAdmin()) throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
+        // Отримуємо користувача, якому ми змінюємо роль
+        List<User> users = userDao.getById(request.getUserId());
+        if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
+        User user = users.getFirst();
+        // Отримуємо роль, на яку будемо міняти
+        List<Integer> roleIds = roleDao.findIdByName(request.getRoleName());
+        // Перевіряємо, що роль існує
+        if (roleIds.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.ROLE_NOT_FOUND);
+        Integer roleId = roleIds.getFirst();
+        List<Role> newRoles = roleDao.getById(roleId);
+        List<Role> oldRoles = roleDao.getById(user.getRoleId());
+        if (newRoles.isEmpty() || oldRoles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
+        Role newRole = newRoles.getFirst();
+        Role oldRole = oldRoles.getFirst();
         // Встановлюємо ID нової ролі
         user.setRoleId(roleId);
         userDao.update(user);
