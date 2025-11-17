@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
@@ -25,13 +25,13 @@ import org.ua.fkrkm.progplatform.utils.Msid;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 /**
  * Фільтр для аутентифікації запиту
  */
-@Order(2)
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -49,6 +49,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final static Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     // Поточна дата
     private final static String DATE = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(new Date());
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+    private static final String[] NOT_FILTERED_URLS = {
+            "/progplatform/",
+            "/**/api/user/registration",
+            "/**/api/user/login",
+            "/**/api/course/getAll",
+            "/**/swagger-ui/**",
+            "/**/v3/api-docs/**"
+    };
 
     /**
      * Конструктор
@@ -71,13 +81,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.authDao = authDao;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return Arrays.stream(NOT_FILTERED_URLS)
+                .anyMatch(uri -> this.antPathMatcher.match(uri, request.getRequestURI()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().equals("/api/user/registration") || request.getRequestURI().equals("/api/user/login")
-                || request.getRequestURI().contains("swagger-ui") || request.getRequestURI().contains("/v3/api-docs") || request.getRequestURI().equals("/api/course/getAll")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
         // Намагаємось отримати із запиту повний рядок разом з токеном
         String authHeader = request.getHeader("Authorization");
         try {

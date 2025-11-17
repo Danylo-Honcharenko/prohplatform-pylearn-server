@@ -108,7 +108,7 @@ INSERT INTO roles (name) VALUES ('ROLE_TEACHER');
 INSERT INTO roles (name) VALUES ('ROLE_ADMIN');
 
 INSERT INTO users (first_name, last_name, email, password, role_id, created)
-VALUES ('David', 'Menchuk', 'test.test@icloud.com','123456789', 1, '2024-09-11 17:09:10');
+VALUES ('David', 'Menchuk', 'test.test@icloud.com','{bcrypt}$2a$10$jE3ybXkEV4bbWutX01ZWhOH5Qn1anLONmN8vTOkkAvWov0vU9.IsO', 1, '2024-09-11 17:09:10');
 
 INSERT INTO users (first_name, last_name, email ,password, role_id, created)
 VALUES ('Dima', 'Valentinov', 'test1.test@icloud.com', '123456789', 1, '2024-09-11 17:09:10');
