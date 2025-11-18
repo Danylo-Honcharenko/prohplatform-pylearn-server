@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
@@ -175,7 +173,7 @@ public class UserServiceImpl implements UserServiceI {
     public UserResponse getUserByParams(Integer id, String firstName, String lastName, String email) {
         // Отримуємо користувача по параметрам
         List<User> users = userDao.findByParams(id, firstName, lastName, email);
-        // Перевіряємо що користувач існує
+        // Перевіряємо, що користувач існує
         if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         User user = users.getFirst();
         List<Role> roles = roleDao.getById(user.getRoleId());
@@ -219,8 +217,6 @@ public class UserServiceImpl implements UserServiceI {
      */
     @Override
     public UpdateUserRoleResponse updateUserRole(UpdateUserRoleRequest request) {
-        // Перевіряємо, що користувач, який міняє роль адмін
-        if (!authUserService.isCurrentAuthUserAdmin()) throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Отримуємо користувача, якому ми змінюємо роль
         List<User> users = userDao.getById(request.getUserId());
         if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
