@@ -29,7 +29,6 @@ import org.ua.fkrkm.progplatformclientlib.response.CreateUserResponse;
 import org.ua.fkrkm.progplatformclientlib.response.CurrentUserResponse;
 import org.ua.fkrkm.progplatformclientlib.response.LogoutResponse;
 
-import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 

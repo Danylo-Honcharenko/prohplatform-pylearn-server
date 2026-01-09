@@ -28,8 +28,8 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
 
     // Сервіс для роботи з токеном
     private final JwtServiceI jwtService;
-    // DAO для роботи з користувачами
-    private final UserDaoI userDao;
+    // Користувач
+    private final User user;
     // DAO для роботи з ролями
     private final RoleDaoI roleDao;
     // Назва cookie з токеном
@@ -45,7 +45,7 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * Конструктор
      *
      * @param jwtService сервіс для роботи з токеном
-     * @param userDao DAO для роботи з користувачами
+     * @param user користувач
      * @param roleDao DAO для роботи з ролями
      * @param cookiesTokenName назва cookie з токеном
      * @param authDao DAO для роботи з аунтифікованими користувачами
@@ -53,14 +53,14 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @param response відповідь
      */
     public GenerateJwtTokenAndPrepareResponse(JwtServiceI jwtService,
-                                              UserDaoI userDao,
+                                              User user,
                                               RoleDaoI roleDao,
                                               String cookiesTokenName,
                                               HttpServletResponse response,
                                               AuthDaoI authDao,
                                               String domain) {
         this.jwtService = jwtService;
-        this.userDao = userDao;
+        this.user = user;
         this.roleDao = roleDao;
         this.cookiesTokenName = cookiesTokenName;
         this.response = response;
@@ -70,10 +70,6 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
 
     @Override
     public LoginUserResponse apply(UserLoginRequest candidate) {
-        // Отримуємо користувача
-        List<User> users = userDao.findByEmail(candidate.getEmail());
-        if (users.isEmpty()) throw new ProgPlatformException(ErrorConsts.USER_NOT_FOUND);
-        User user = users.getFirst();
         // Отримуємо згенерований токен
         String token = this.getGeneratedJwtToken(user);
         // Встановлюємо токен в Cookie відповіді

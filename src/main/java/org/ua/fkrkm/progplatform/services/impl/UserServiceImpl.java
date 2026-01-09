@@ -23,7 +23,6 @@ import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 import org.ua.fkrkm.progplatform.services.UserServiceI;
 import org.ua.fkrkm.progplatform.function.GenerateJwtTokenAndPrepareResponse;
-import org.ua.fkrkm.progplatform.function.Authenticate;
 import org.ua.fkrkm.progplatform.function.ValidatePasswordHash;
 import org.ua.fkrkm.progplatform.utils.AuthChain;
 import org.ua.fkrkm.progplatformclientlib.request.*;
@@ -86,13 +85,15 @@ public class UserServiceImpl implements UserServiceI {
      */
     @Override
     public LoginUserResponse login(UserLoginRequest request, HttpServletResponse response) {
+        // Шукаємо користувача
+        List<User> user = userDao.findByEmail(request.getEmail());
+        // Перевіряємо, що він існує
+        if (user.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         return AuthChain.init(request)
-                // Аутентифікуємо користувача
-                .apply(new Authenticate(userDao))
                 // Перевіряємо хеш пароля
-                .check(new ValidatePasswordHash(passwordEncoder, userDao))
+                .check(new ValidatePasswordHash(passwordEncoder, user.getFirst()))
                 // Генеруємо Jwt токен і готуємо відповідь для клієнта
-                .get(new GenerateJwtTokenAndPrepareResponse(jwtService, userDao, roleDao, cookiesTokenName, response, authDao, domain));
+                .get(new GenerateJwtTokenAndPrepareResponse(jwtService, user.getFirst(), roleDao, cookiesTokenName, response, authDao, domain));
     }
 
     /**
@@ -101,14 +102,14 @@ public class UserServiceImpl implements UserServiceI {
     @Override
     public LogoutResponse logout(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        // Перевіряємо що cookie встановлені
+        // Перевіряємо, що cookie встановлені
         if (cookies == null) return new LogoutResponse("TOKEN NO CONTAINED IN COOKIES!");
         Optional<Cookie> optionalCookie = Stream.of(cookies)
                 // Намагаємось знайти cookie за ім'ям
                 .filter(cookie -> cookie.getName().equals(cookiesTokenName))
                 .findFirst();
         boolean isCookiePresent = optionalCookie.isPresent();
-        // Перевіряємо що потрібний cookie встановлено
+        // Перевіряємо, що потрібний cookie встановлено
         if (isCookiePresent) {
             Cookie cookie = optionalCookie.get();
             String token = cookie.getValue();

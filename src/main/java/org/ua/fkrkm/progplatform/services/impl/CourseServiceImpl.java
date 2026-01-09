@@ -39,7 +39,7 @@ public class CourseServiceImpl implements CourseServiceI {
     // Сервіс для роботи з поточним користувачем в системі
     private final AuthUserServiceI authUserService;
     // Конвертор
-    private final CourseToCourseResponse courseResponseCourseConverter;
+    private final Converter<Course, CourseResponse> courseResponseCourseConverter;
     // DAO для роботи з модулями
     private final ModuleDaoI moduleDao;
     // DAO для роботи з темами
