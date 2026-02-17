@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 
 import java.security.Key;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,34 +26,41 @@ public class JwtServiceImpl implements JwtServiceI {
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
+    private final Map<String, String> tokenInf = new HashMap<>();
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Override
-    public String generateToken(UserDetails user) {
-        return buildToken(new HashMap<>(), user, jwtExpiration);
+    public Map<String, String> generateToken(UserDetails user) {
+        String token = this.buildToken(new HashMap<>(), user, jwtExpiration);
+        this.tokenInf.put("token", token);
+        return tokenInf;
     }
 
     @Override
     public boolean isTokenValid(String token, UserDetails user) {
-        String userName = extractUserName(token);
+        String userName = this.extractUserName(token);
         return (userName.equals(user.getUsername())
                 && !isTokenExpired(token));
     }
 
     @Override
     public String extractUserName(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return this.extractClaim(token, Claims::getSubject);
     }
 
     @Override
     public Long getExpirationTime() {
-        return jwtExpiration;
+        return this.jwtExpiration;
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails user, long expiration) {
+        Date expirationDate = new Date(System.currentTimeMillis() + expiration);
+        this.tokenInf.put("tokenExpDate", this.dateFormat.format(expirationDate));
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(expirationDate)
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
 

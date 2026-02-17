@@ -126,7 +126,7 @@ public class CourseServiceImpl implements CourseServiceI {
         User currentAuthUser = authUserService.getCurrentAuthUser();
         // Отримуємо ID користувача
         Integer userId = currentAuthUser.getId();
-        boolean userExistsInCourse = checkIfUserExistsInCourse(courseId, userId);
+        boolean userExistsInCourse = this.checkIfUserExistsInCourse(courseId, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
             throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
@@ -150,7 +150,7 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public AddUserToCourseResponse addUserToCourse(int userId, int courseId) {
-        boolean userExistsInCourse = checkIfUserExistsInCourse(courseId, userId);
+        boolean userExistsInCourse = this.checkIfUserExistsInCourse(courseId, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
             throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
@@ -164,7 +164,7 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public DeleteUserFromCourseResponse deleteUserFromCourse(int userId, int courseId) {
-        boolean userExistsInCourse = checkIfUserExistsInCourse(courseId, userId);
+        boolean userExistsInCourse = this.checkIfUserExistsInCourse(courseId, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse)
             throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
@@ -192,6 +192,7 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public CourseResponse getCourseById(int courseId, Integer userId) {
+        // TODO должна стать основной реализацией
         // Заповнюємо объект
         return ObjectModifier.init(new CourseResponse())
                 // Отримуємо курс по ID та заповнюємо объект
@@ -214,7 +215,9 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public UserCourseResponse getCourseByUserId(int userId) {
-        List<Course> courses = courseDao.getCoursesIdByUserId(userId);
+        List<CourseResponse> courses = courseDao.getCoursesIdByUserId(userId).stream()
+                .map(courseResponseCourseConverter::convert)
+                .toList();
         return new UserCourseResponse(courses);
     }
 }

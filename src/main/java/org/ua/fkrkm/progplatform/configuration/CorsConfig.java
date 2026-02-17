@@ -25,7 +25,8 @@ public class CorsConfig {
     public CorsConfigurationSource getCorsConfigSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
+//        config.setAllowedOrigins(Collections.singletonList(""));
+        config.addAllowedOriginPattern("http://localhost:*");
         config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Msid"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setMaxAge(3600L);

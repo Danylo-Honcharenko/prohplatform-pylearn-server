@@ -2,10 +2,9 @@ package org.ua.fkrkm.progplatform.function;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.apache.commons.lang3.time.DateUtils;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
-import org.ua.fkrkm.proglatformdao.dao.UserDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Auth;
 import org.ua.fkrkm.proglatformdao.entity.Role;
 import org.ua.fkrkm.proglatformdao.entity.User;
@@ -15,8 +14,10 @@ import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import static org.springframework.security.core.userdetails.User.*;
@@ -70,12 +71,16 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
 
     @Override
     public LoginUserResponse apply(UserLoginRequest candidate) {
-        // Отримуємо згенерований токен
-        String token = this.getGeneratedJwtToken(user);
+        // Отримуємо інформацію по згенерованому токену
+        Map<String, String> tokenInfo = this.getGeneratedJwtTokenInfo(user);
+        // Згенерований токен
+        String token = tokenInfo.get("token");
+        // Час коли токен затухне
+        String tokenExpirationDate = tokenInfo.get("tokenExpDate");
         // Встановлюємо токен в Cookie відповіді
         this.setJwtTokenToCookie(token);
         // Зберігаємо токен в базі активних токенів
-        this.saveTokenInDatabase(token, user.getId());
+        this.saveTokenInDatabase(token, user.getId(), this.getParseDate(tokenExpirationDate));
         // Заповняємо відповідь
         return LoginUserResponse.builder()
                 .id(user.getId())
@@ -83,6 +88,7 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
                 .lastName(user.getLast_name())
                 .role(this.getRoleNameById(user.getRoleId()))
                 .created(user.getCreated())
+                .tokenExpirationDate(tokenExpirationDate)
                 .build();
     }
 
@@ -90,9 +96,9 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * Отримуємо згенерований Jwt токен
      *
      * @param user користувач
-     * @return String Jwt токен
+     * @return Map<String, String> інформація згенерованому токену
      */
-    private String getGeneratedJwtToken(User user) {
+    private Map<String, String> getGeneratedJwtTokenInfo(User user) {
         UserBuilder buildUser = withUsername(user.getEmail());
         buildUser.password(user.getPassword());
         return jwtService.generateToken(buildUser.build());
@@ -133,14 +139,27 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @param token токен
      * @param userId ID користувача
      */
-    private void saveTokenInDatabase(String token, int userId) {
-        Long expirationTime = jwtService.getExpirationTime();
+    private void saveTokenInDatabase(String token, int userId, Date tokenExpirationDate) {
         Auth auth = Auth.builder()
                 .userId(userId)
                 .accessToken(token)
                 .created(new Date())
-                .expiresIn(new Date(System.currentTimeMillis() + expirationTime))
+                .expiresIn(tokenExpirationDate)
                 .build();
         authDao.create(auth);
+    }
+
+    /**
+     * Зпарсити дату
+     *
+     * @param date дата як строка
+     * @return Date дата
+     */
+    private Date getParseDate(String date) {
+        try {
+            return DateUtils.parseDate(date, "yyyy-MM-dd HH:mm:ss");
+        } catch (ParseException parseException) {
+            throw new ProgPlatformException(ErrorConsts.PARS_TOKEN_EXP_TIME_ERROR);
+        }
     }
 }

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,12 +53,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final static String DATE = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(new Date());
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
+    private final FilterRegistrationBean<RateLimitingFilter> rateLimitingFilter;
+
     private static final String[] NOT_FILTERED_URLS = {
             "/progplatform/",
             "/**/api/user/registration",
             "/**/api/user/login",
             "/**/api/user/updatePassword",
             "/**/api/course/getAll",
+            "/**/api/course/get",
+            "/**/api/course/getUserCourse",
             "/**/swagger-ui/**",
             "/**/v3/api-docs/**"
     };
@@ -75,12 +80,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                    UserDetailsService userDetailsService,
                                    @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver,
                                    @Value("${cookies.jwt.token.name}") String cookiesTokenName,
-                                   AuthDaoI authDao) {
+                                   AuthDaoI authDao,
+                                   FilterRegistrationBean<RateLimitingFilter> rateLimitingFilter) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.handlerExceptionResolver = handlerExceptionResolver;
         this.cookiesTokenName = cookiesTokenName;
         this.authDao = authDao;
+        this.rateLimitingFilter = rateLimitingFilter;
     }
 
     /**
@@ -97,6 +104,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+//        this.rateLimitingFilter.getFilter().doFilter(request, response, filterChain);
         // Намагаємось отримати із запиту повний рядок разом з токеном
         String authHeader = request.getHeader("Authorization");
         try {

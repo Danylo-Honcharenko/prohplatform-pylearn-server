@@ -86,4 +86,13 @@ public class ErrorConsts {
             "ru", "У вас недостаточно прав для совершения этого действия!",
             "en", "You do not have sufficient rights to perform this action!"
     ));
+
+    /**
+     * Неможливо спарсити дату закінчення токена!
+     */
+    public final static ErrorCfg PARS_TOKEN_EXP_TIME_ERROR = new ErrorCfg(Map.of(
+            "uk", "Неможливо спарсити дату закінчення токена!",
+            "ru", "Невозможно спарсить дату истечение токена!",
+            "en", "Unable to parse token expiration date!"
+    ));
 }
