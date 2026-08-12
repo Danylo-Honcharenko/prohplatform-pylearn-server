@@ -33,7 +33,7 @@ public class UserControllerTest {
 
     @Test
     public void logoutTest() {
-        assertNotNull(userController.logout(new MockHttpServletRequest()));
+        assertNotNull(userController.logout(new MockHttpServletRequest(), new MockHttpServletResponse()));
     }
 
     @Test

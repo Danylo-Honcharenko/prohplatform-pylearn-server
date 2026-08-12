@@ -30,7 +30,7 @@ public class JwtServiceTest {
     public void generateTokenTest() {
         User.UserBuilder buildUser = withUsername("test.test@gmail.com");
         buildUser.password("12345678");
-        String token = jwtService.generateToken(buildUser.build()).get("token");
+        String token = jwtService.generateToken(buildUser.build()).getToken();
         assertNotNull(token);
     }
 
@@ -39,7 +39,7 @@ public class JwtServiceTest {
         String userEmail = "test.test@gmail.com";
         User.UserBuilder buildUser = withUsername(userEmail);
         buildUser.password("12345678");
-        String token = jwtService.generateToken(buildUser.build()).get("token");
+        String token = jwtService.generateToken(buildUser.build()).getToken();
         String userName = jwtService.extractUserName(token);
         assertEquals(userEmail, userName);
     }
@@ -49,7 +49,7 @@ public class JwtServiceTest {
         String userEmail = "test.test@gmail.com";
         User.UserBuilder buildUser = withUsername(userEmail);
         buildUser.password("12345678");
-        String token = jwtService.generateToken(buildUser.build()).get("token");
+        String token = jwtService.generateToken(buildUser.build()).getToken();
 
         assertTrue(jwtService.isTokenValid(token, buildUser.build()));
     }

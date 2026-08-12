@@ -3,11 +3,14 @@ package org.ua.fkrkm.progplatform.function;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Auth;
 import org.ua.fkrkm.proglatformdao.entity.Role;
 import org.ua.fkrkm.proglatformdao.entity.User;
+import org.ua.fkrkm.progplatform.dto.GeneratedToken;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
@@ -39,8 +42,6 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
     private final HttpServletResponse response;
     // DAO для роботи з аунтифікованими користувачами
     private final AuthDaoI authDao;
-    // Поточний домен
-    private final String domain;
 
     /**
      * Конструктор
@@ -50,7 +51,6 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @param roleDao DAO для роботи з ролями
      * @param cookiesTokenName назва cookie з токеном
      * @param authDao DAO для роботи з аунтифікованими користувачами
-     * @param domain поточний домен
      * @param response відповідь
      */
     public GenerateJwtTokenAndPrepareResponse(JwtServiceI jwtService,
@@ -58,29 +58,27 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
                                               RoleDaoI roleDao,
                                               String cookiesTokenName,
                                               HttpServletResponse response,
-                                              AuthDaoI authDao,
-                                              String domain) {
+                                              AuthDaoI authDao) {
         this.jwtService = jwtService;
         this.user = user;
         this.roleDao = roleDao;
         this.cookiesTokenName = cookiesTokenName;
         this.response = response;
         this.authDao = authDao;
-        this.domain = domain;
     }
 
     @Override
     public LoginUserResponse apply(UserLoginRequest candidate) {
         // Отримуємо інформацію по згенерованому токену
-        Map<String, String> tokenInfo = this.getGeneratedJwtTokenInfo(user);
+        GeneratedToken tokenInfo = this.getGeneratedJwtTokenInfo(user);
         // Згенерований токен
-        String token = tokenInfo.get("token");
+        String token = tokenInfo.getToken();
         // Час коли токен затухне
-        String tokenExpirationDate = tokenInfo.get("tokenExpDate");
+        Date tokenExpirationDate = tokenInfo.getExpired();
         // Встановлюємо токен в Cookie відповіді
         this.setJwtTokenToCookie(token);
         // Зберігаємо токен в базі активних токенів
-        this.saveTokenInDatabase(token, user.getId(), this.getParseDate(tokenExpirationDate));
+        this.saveTokenInDatabase(token, user.getId(), tokenExpirationDate);
         // Заповняємо відповідь
         return LoginUserResponse.builder()
                 .id(user.getId())
@@ -88,7 +86,6 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
                 .lastName(user.getLast_name())
                 .role(this.getRoleNameById(user.getRoleId()))
                 .created(user.getCreated())
-                .tokenExpirationDate(tokenExpirationDate)
                 .build();
     }
 
@@ -98,7 +95,7 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @param user користувач
      * @return Map<String, String> інформація згенерованому токену
      */
-    private Map<String, String> getGeneratedJwtTokenInfo(User user) {
+    private GeneratedToken getGeneratedJwtTokenInfo(User user) {
         UserBuilder buildUser = withUsername(user.getEmail());
         buildUser.password(user.getPassword());
         return jwtService.generateToken(buildUser.build());
@@ -110,14 +107,16 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @param jwtToken токен
      */
     private void setJwtTokenToCookie(String jwtToken) {
-        Cookie cookie = new Cookie(cookiesTokenName, jwtToken);
-        cookie.setMaxAge(36000);
-        cookie.setSecure(false);
-        cookie.setHttpOnly(true);
-        cookie.setDomain(domain);
-        cookie.setPath("/");
+        ResponseCookie cookie = ResponseCookie
+                .from(cookiesTokenName, jwtToken)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(360)
+                .build();
 
-        response.addCookie(cookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     /**
@@ -147,19 +146,5 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
                 .expiresIn(tokenExpirationDate)
                 .build();
         authDao.create(auth);
-    }
-
-    /**
-     * Зпарсити дату
-     *
-     * @param date дата як строка
-     * @return Date дата
-     */
-    private Date getParseDate(String date) {
-        try {
-            return DateUtils.parseDate(date, "yyyy-MM-dd HH:mm:ss");
-        } catch (ParseException parseException) {
-            throw new ProgPlatformException(ErrorConsts.PARS_TOKEN_EXP_TIME_ERROR);
-        }
     }
 }

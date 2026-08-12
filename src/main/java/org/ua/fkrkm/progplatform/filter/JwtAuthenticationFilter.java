@@ -1,5 +1,8 @@
 package org.ua.fkrkm.progplatform.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -7,25 +10,32 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Auth;
+import org.ua.fkrkm.progplatform.exceptions.InvalidJwtAuthenticationException;
+import org.ua.fkrkm.progplatform.exceptions.RevokedJwtAuthenticationException;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
-import org.ua.fkrkm.progplatform.utils.Msid;
+import org.ua.fkrkm.progplatformclientlib.response.ErrorResponse;
+import org.ua.fkrkm.progplatformclientlib.response.Response;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -41,62 +51,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtServiceI jwtService;
     // Сервіс з деталями про користувача
     private final UserDetailsService userDetailsService;
-    // Обробка помилок
-    private final HandlerExceptionResolver handlerExceptionResolver;
     // Назва cookie
     private final String cookiesTokenName;
     // DAO для роботи з аунтифікованими користувачами
     private final AuthDaoI authDao;
     // Логер
     private final static Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-    // Поточна дата
-    private final static String DATE = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(new Date());
-    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
-    private final FilterRegistrationBean<RateLimitingFilter> rateLimitingFilter;
+    private final ObjectMapper objectMapper;
 
-    private static final String[] NOT_FILTERED_URLS = {
-            "/progplatform/",
-            "/**/api/user/registration",
-            "/**/api/user/login",
-            "/**/api/user/updatePassword",
-            "/**/api/course/getAll",
-            "/**/api/course/get",
-            "/**/api/course/getUserCourse",
-            "/**/swagger-ui/**",
-            "/**/v3/api-docs/**"
-    };
+    private final RequestMatcher skipJwtAuthentication = new OrRequestMatcher(
+            new AntPathRequestMatcher("/api/user/login", "POST"),
+            new AntPathRequestMatcher("/api/user/registration", "POST"),
+            new AntPathRequestMatcher("/api/user/updatePassword", "PUT")
+    );
 
     /**
      * Конструктор
      *
      * @param jwtService Сервіс для роботи з Jwt токеном
      * @param userDetailsService Сервіс з деталями про користувача
-     * @param handlerExceptionResolver Обробка помилок
      * @param cookiesTokenName Назва cookies в якому може зберігатися токен
      * @param authDao DAO для роботи з аунтифікованими користувачами
      */
     public JwtAuthenticationFilter(JwtServiceI jwtService,
                                    UserDetailsService userDetailsService,
-                                   @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver,
                                    @Value("${cookies.jwt.token.name}") String cookiesTokenName,
                                    AuthDaoI authDao,
-                                   FilterRegistrationBean<RateLimitingFilter> rateLimitingFilter) {
+                                   ObjectMapper objectMapper) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
-        this.handlerExceptionResolver = handlerExceptionResolver;
         this.cookiesTokenName = cookiesTokenName;
         this.authDao = authDao;
-        this.rateLimitingFilter = rateLimitingFilter;
+        this.objectMapper = objectMapper;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return Arrays.stream(NOT_FILTERED_URLS)
-                .anyMatch(uri -> this.antPathMatcher.match(uri, request.getRequestURI()));
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return skipJwtAuthentication.matches(request);
     }
 
     /**
@@ -104,73 +99,144 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//        this.rateLimitingFilter.getFilter().doFilter(request, response, filterChain);
-        // Намагаємось отримати із запиту повний рядок разом з токеном
-        String authHeader = request.getHeader("Authorization");
         try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                // Намагаємось отрмати токен з cookies
-                String jwtTokenFromCookie = getJwtTokenFromCookie(request.getCookies());
-                if (jwtTokenFromCookie != null) {
-                    LOGGER.info("Get token from cookie. Time: {}, MSID: {}", DATE, Msid.get());
-                    // Обробляємо токен
-                    processJwtToken(jwtTokenFromCookie, request);
-                }
-                filterChain.doFilter(request, response);
-                return;
+            String token = this.getJwtToken(request);
+
+            if (token != null) {
+                this.authenticateToken(token, request);
             }
-            // Прибираємо Bearer в рядку з токеном
-            String jwt = authHeader.substring(7);
-            LOGGER.info("Get token from header. Time: {}, MSID: {}", DATE, Msid.get());
-            // Обробляємо токен
-            processJwtToken(jwt, request);
+
             filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            handlerExceptionResolver.resolveException(request, response, null, e);
+        } catch (ExpiredJwtException exception) {
+
+            this.logError(exception);
+            this.processError(response, "Токен авторизації не дійсний", "Виконайте вхід у систему");
+
+        } catch (UsernameNotFoundException exception) {
+
+            this.logError(exception);
+            this.processError(response, "Не знайдено користувача", "Не вдалось знайти користувача при спробі авторизації");
+
+        } catch (JwtException | IllegalArgumentException exception) {
+
+            this.logError(exception);
+            this.processError(response, "Токен авторизації не валідний", "Виконайте вхід у систему");
+
         }
+    }
+
+    /**
+     * Отримуємо токен з хедеру або з cookie
+     *
+     * @param request запит
+     * @return String токен
+     */
+    private String getJwtToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7).trim();
+            return token.isEmpty() ? null : token;
+        }
+
+        return this.getJwtTokenFromCookie(request);
     }
 
     /**
      * Отримати токен з cookies
      *
-     * @param cookies cookies
+     * @param request запит
      * @return String токен
      */
-    private String getJwtTokenFromCookie(Cookie[] cookies) {
-        if (cookies == null) return null;
-        for (Cookie cookie : cookies) {
-            if (cookiesTokenName.equals(cookie.getName())) {
-                return cookie.getValue();
-            }
+    private String getJwtTokenFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            return null;
         }
-        return null;
+
+        return Arrays.stream(cookies)
+                .filter(cookie -> cookiesTokenName.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .filter(value -> value != null && !value.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 
     /**
-     * Обробка токену
+     * Аутентифікуємо користувача по токену
      *
      * @param token токен
      * @param request запит
      */
-    private void processJwtToken(String token, HttpServletRequest request) {
-        // З токену отримуємо Email користувача
+    private void authenticateToken(String token, HttpServletRequest request) {
         String email = jwtService.extractUserName(token);
-        // З SecurityContextHolder отримуємо поточний стан аутентифікації
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // Перевіряємо що ми отримали Email
-        if (email != null && authentication == null) {
-            // Отримуємо користувача по email з бази даних
-            UserDetails user = userDetailsService.loadUserByUsername(email);
-            // Перевіряємо токен на валідність
-            if (jwtService.isTokenValid(token, user) && checkAccessTokenInDatabase(token)) {
-                LOGGER.info("Token valid. Time: {}, MSID: {}", DATE, Msid.get());
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        user, null, user.getAuthorities());
 
-                usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("JWT subject is missing");
         }
+
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            return;
+        }
+
+        UserDetails user = userDetailsService.loadUserByUsername(email);
+
+        if (!jwtService.isTokenValid(token, user)) {
+            throw new InvalidJwtAuthenticationException("JWT claims are invalid");
+        }
+
+        if (!checkAccessTokenInDatabase(token)) {
+            throw new RevokedJwtAuthenticationException("JWT is revoked");
+        }
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        user,
+                        null,
+                        user.getAuthorities()
+                );
+
+        authentication.setDetails(new WebAuthenticationDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    /**
+     * Обробка помилки
+     *
+     * @param response відповідь
+     * @param message повідомлення помилки
+     * @param detail опис помилки
+     * @throws IOException помилка
+     */
+    private void processError(HttpServletResponse response, String message, String detail) throws IOException {
+
+        SecurityContextHolder.clearContext();
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        Response<ErrorResponse> error = new Response<>(
+                HttpStatus.UNAUTHORIZED,
+                new ErrorResponse(
+                        message,
+                        detail,
+                        MDC.get("msid")
+                )
+        );
+
+        this.objectMapper.writeValue(response.getOutputStream(), error);
+    }
+
+    /**
+     * Логуємо помилку
+     *
+     * @param exception помилка
+     */
+    private void logError(RuntimeException exception) {
+        LOGGER.error("Error: {}, Trace UUID: {}", exception.getMessage(), MDC.get("msid"));
     }
 
     /**

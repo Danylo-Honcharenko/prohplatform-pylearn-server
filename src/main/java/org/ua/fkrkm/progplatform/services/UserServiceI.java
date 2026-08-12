@@ -30,7 +30,7 @@ public interface UserServiceI {
      * @param request запит
      * @return LogoutResponse відповідь API
      */
-    LogoutResponse logout(HttpServletRequest request);
+    LogoutResponse logout(HttpServletRequest request, HttpServletResponse response);
     /**
      * Отримати поточного користувача в системі
      *

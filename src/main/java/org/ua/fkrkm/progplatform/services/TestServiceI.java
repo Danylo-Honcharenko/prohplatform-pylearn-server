@@ -44,8 +44,7 @@ public interface TestServiceI {
     /**
      * Отримати результати тестування по ID користувача
      *
-     * @param userId ID користувача
      * @return TestResultsResponse відповідь API
      */
-    TestResultsResponse getTestResultByUserId(Integer userId);
+    TestResultsResponse getAllUserTestResult();
 }

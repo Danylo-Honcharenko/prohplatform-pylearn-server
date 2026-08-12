@@ -86,7 +86,6 @@ public class TestController {
     /**
      * Отримати всі результати тестування по ID користувача
      *
-     * @param userId ID користувача
      * @return Response<TestResultsResponse> відповідь API
      */
     @Operation(
@@ -98,7 +97,7 @@ public class TestController {
     })
     @ResponseBody
     @GetMapping("/getTestsResults")
-    public Response<TestResultsResponse> getTestResultByUserId(@Parameter(description = "ID користувача") @RequestParam(name = "userId") Integer userId) {
-        return new Response<>(HttpStatus.OK, testService.getTestResultByUserId(userId));
+    public Response<TestResultsResponse> getAllUserTestResult() {
+        return new Response<>(HttpStatus.OK, testService.getAllUserTestResult());
     }
 }

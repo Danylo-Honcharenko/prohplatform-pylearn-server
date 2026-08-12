@@ -14,7 +14,7 @@
     <artifactId>progplatform</artifactId>
     <description>Сервер платформи для вивчення мов програмування</description>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <java.version>21</java.version>

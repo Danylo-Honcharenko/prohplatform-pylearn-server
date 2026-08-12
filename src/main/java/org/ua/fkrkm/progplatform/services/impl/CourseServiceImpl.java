@@ -3,6 +3,7 @@ package org.ua.fkrkm.progplatform.services.impl;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.ua.fkrkm.proglatformdao.dao.*;
 import org.ua.fkrkm.proglatformdao.entity.Course;
 import org.ua.fkrkm.proglatformdao.entity.User;
@@ -47,12 +48,13 @@ public class CourseServiceImpl implements CourseServiceI {
     // DAO для роботи зі статистикой по модулю
     private final ModuleStatDaoI moduleStatDao;
     // DAO для роботи з тестами
-    private final TestDaoI testDao;
+//    private final TestDaoI testDao;
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public CreateCourseResponse create(CreateCourseRequest request) {
         // Отримуємо поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
@@ -192,7 +194,6 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public CourseResponse getCourseById(int courseId, Integer userId) {
-        // TODO должна стать основной реализацией
         // Заповнюємо объект
         return ObjectModifier.init(new CourseResponse())
                 // Отримуємо курс по ID та заповнюємо объект
@@ -214,8 +215,9 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public UserCourseResponse getCourseByUserId(int userId) {
-        List<CourseResponse> courses = courseDao.getCoursesIdByUserId(userId).stream()
+    public UserCourseResponse getUserCourses() {
+        User authUser = authUserService.getCurrentAuthUser();
+        List<CourseResponse> courses = courseDao.getCoursesIdByUserId(authUser.getId()).stream()
                 .map(courseResponseCourseConverter::convert)
                 .toList();
         return new UserCourseResponse(courses);

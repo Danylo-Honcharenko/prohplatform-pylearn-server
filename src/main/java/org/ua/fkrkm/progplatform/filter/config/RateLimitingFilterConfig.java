@@ -13,19 +13,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Configuration
 public class RateLimitingFilterConfig {
 
-    private final Map<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
+//    private final Map<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
 
-    @Bean
-    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilter() {
-        FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new RateLimitingFilter(this.requestCounts));
-        registration.addUrlPatterns("/api/*");
-        return registration;
-    }
-
-    @Scheduled(fixedRate = 60_000)
-    public void clearCounts() {
-        this.requestCounts.clear();
-        System.out.println("Counts cleared!");
-    }
+//    @Bean
+//    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilter() {
+//        FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>();
+//        registration.setFilter(new RateLimitingFilter(this.requestCounts));
+//        registration.addUrlPatterns("/api/*");
+//        return registration;
+//    }
+//
+//    @Scheduled(fixedRate = 60_000)
+//    public void clearCounts() {
+//        this.requestCounts.clear();
+//        System.out.println("Counts cleared!");
+//    }
 }

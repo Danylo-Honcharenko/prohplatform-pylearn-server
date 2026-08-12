@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
@@ -65,9 +67,6 @@ public class UserServiceImpl implements UserServiceI {
     // Ім'я кукі з JWT токеном
     @Value("${cookies.jwt.token.name}")
     private String cookiesTokenName;
-    // Поточний домен
-    @Value("${my.server.domain}")
-    private String domain;
 
     /**
      * {@inheritDoc}
@@ -93,14 +92,14 @@ public class UserServiceImpl implements UserServiceI {
                 // Перевіряємо хеш пароля
                 .check(new ValidatePasswordHash(passwordEncoder, user.getFirst()))
                 // Генеруємо Jwt токен і готуємо відповідь для клієнта
-                .get(new GenerateJwtTokenAndPrepareResponse(jwtService, user.getFirst(), roleDao, cookiesTokenName, response, authDao, domain));
+                .get(new GenerateJwtTokenAndPrepareResponse(jwtService, user.getFirst(), roleDao, cookiesTokenName, response, authDao));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public LogoutResponse logout(HttpServletRequest request) {
+    public LogoutResponse logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         // Перевіряємо, що cookie встановлені
         if (cookies == null) return new LogoutResponse("TOKEN NO CONTAINED IN COOKIES!");
@@ -111,8 +110,21 @@ public class UserServiceImpl implements UserServiceI {
         boolean isCookiePresent = optionalCookie.isPresent();
         // Перевіряємо, що потрібний cookie встановлено
         if (isCookiePresent) {
+
+            ResponseCookie deleteCookie = ResponseCookie
+                    .from(cookiesTokenName, "")
+                    .httpOnly(true)
+                    .secure(false)
+                    .sameSite("Lax")
+                    .path("/")
+                    .maxAge(0)
+                    .build();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+
             Cookie cookie = optionalCookie.get();
             String token = cookie.getValue();
+
             // Видаляємо токен з бази
             authDao.deleteByAccessToken(token);
         }

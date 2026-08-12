@@ -34,6 +34,6 @@ public class TestControllerTest {
 
     @Test
     public void getTestResultByUserIdTest() {
-        assertNotNull(testController.getTestResultByUserId(1));
+        assertNotNull(testController.getAllUserTestResult());
     }
 }

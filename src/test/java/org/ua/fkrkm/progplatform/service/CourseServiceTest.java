@@ -48,8 +48,7 @@ public class CourseServiceTest {
                 courseResponseCourseConverter,
                 moduleDao,
                 topicDao,
-                moduleStatDao,
-                testDao
+                moduleStatDao
         );
     }
 

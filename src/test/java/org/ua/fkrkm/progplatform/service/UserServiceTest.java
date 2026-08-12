@@ -122,11 +122,12 @@ public class UserServiceTest {
         Cookie[] cookies = new Cookie[]{cookie};
 
         HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
         when(request.getCookies())
                 .thenReturn(cookies);
 
-        LogoutResponse logoutResponse = userService.logout(request);
+        LogoutResponse logoutResponse = userService.logout(request, response);
 
         assertEquals("LOGOUT", logoutResponse.getStatus());
     }

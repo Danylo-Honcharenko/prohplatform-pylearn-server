@@ -81,7 +81,6 @@ public class CourseController {
     /**
      * Отримати курси користувача
      *
-     * @param userId ID користувача
      * @return Response<UserCourseResponse> відповідь API
      */
     @Operation(
@@ -93,7 +92,7 @@ public class CourseController {
     })
     @ResponseBody
     @GetMapping("/getUserCourse")
-    public Response<UserCourseResponse> getUserCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") int userId) {
-        return new Response<>(HttpStatus.OK, courseService.getCourseByUserId(userId));
+    public Response<UserCourseResponse> getUserCourses() {
+        return new Response<>(HttpStatus.OK, courseService.getUserCourses());
     }
 }

@@ -88,8 +88,8 @@ public class UserController {
     })
     @ResponseBody
     @PostMapping("/logout")
-    public Response<LogoutResponse> logout(HttpServletRequest request) {
-        return new Response<>(HttpStatus.OK, userService.logout(request));
+    public Response<LogoutResponse> logout(HttpServletRequest request, HttpServletResponse response) {
+        return new Response<>(HttpStatus.OK, userService.logout(request, response));
     }
 
     /**

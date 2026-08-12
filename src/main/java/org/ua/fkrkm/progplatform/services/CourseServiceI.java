@@ -76,8 +76,7 @@ public interface CourseServiceI {
     /**
      * Отримати всі курси користувача
      *
-     * @param userId ID користувача
      * @return UserCourseResponse відповідь API
      */
-    UserCourseResponse getCourseByUserId(int userId);
+    UserCourseResponse getUserCourses();
 }

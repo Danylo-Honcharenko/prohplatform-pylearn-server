@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.TestDaoI;
 import org.ua.fkrkm.proglatformdao.dao.TestResultDaoI;
 import org.ua.fkrkm.proglatformdao.entity.TestResult;
+import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entityMongo.Question;
 import org.ua.fkrkm.proglatformdao.entityMongo.Test;
 import org.ua.fkrkm.proglatformdao.entityMongo.view.AnswerView;
 import org.ua.fkrkm.proglatformdao.entityMongo.view.TestView;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
+import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.converters.AnswerViewToQuestion;
@@ -46,6 +48,8 @@ public class TestServiceImpl implements TestServiceI {
     private final TestResultDaoI testResultDao;
     // Конвертор
     private final Converter<List<TestResult>, TestResultsResponse> testResultsResponseTestResultsConverter;
+
+    private final AuthUserServiceI authUserService;
 
     /**
      * {@inheritDoc}
@@ -136,8 +140,9 @@ public class TestServiceImpl implements TestServiceI {
      * {@inheritDoc}
      */
     @Override
-    public TestResultsResponse getTestResultByUserId(Integer userId) {
-        List<TestResult> results = testResultDao.getTestResultsByUserId(userId);
+    public TestResultsResponse getAllUserTestResult() {
+        User authUser = this.authUserService.getCurrentAuthUser();
+        List<TestResult> results = testResultDao.getTestResultsByUserId(authUser.getId());
         return testResultsResponseTestResultsConverter.convert(results);
     }
 }
