@@ -41,7 +41,7 @@ public class CourseController {
     /**
      * Отримати користувачів курсу
      *
-     * @param courseId ID курсу
+     * @param id ID курсу
      * @return Response<CourseUsersResponse> відповідь API
      */
     @Operation(
@@ -53,15 +53,15 @@ public class CourseController {
             @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
     })
     @ResponseBody
-    @GetMapping("/getCourseUsers")
-    public Response<CourseUsersResponse> getCourseUsers(@Parameter(description = "ID курсу") @RequestParam(name = "courseId") int courseId) {
-        return new Response<>(HttpStatus.OK, courseService.getCourseUsers(courseId));
+    @GetMapping("/{id}/getUsers")
+    public Response<CourseUsersResponse> getCourseUsers(@Parameter(description = "ID курсу") @PathVariable int id) {
+        return new Response<>(HttpStatus.OK, courseService.getCourseUsers(id));
     }
 
     /**
      * Отримати курс по ID
      *
-     * @param courseId ID курсу
+     * @param id ID курсу
      * @return Response<CourseResponse> відповідь API
      */
     @Operation(
@@ -72,10 +72,28 @@ public class CourseController {
             @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
     })
     @ResponseBody
-    @GetMapping("/get")
-    public Response<CourseResponse> getCourseById(@Parameter(description = "ID курсу") @RequestParam(name = "courseId") int courseId,
-                                                  @Parameter(description = "ID користувача") @RequestParam(name = "userId", required = false) Integer userId) {
-        return new Response<>(HttpStatus.OK, courseService.getCourseById(courseId, userId));
+    @GetMapping("/{id}")
+    public Response<CourseResponse> getCourseById(@Parameter(description = "ID курсу") @PathVariable int id) {
+        return new Response<>(HttpStatus.OK, courseService.getCourseById(id));
+    }
+
+    /**
+     * Отримати курс по ID зі статистикою проходження
+     *
+     * @param id ID курсу
+     * @return Response<CourseResponse> відповідь API
+     */
+    @Operation(
+            summary = "Отримати курс по ID зі статистикою проходження"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CourseResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+    })
+    @ResponseBody
+    @GetMapping("/{id}/stat")
+    public Response<CourseResponse> getCourseWithPassingStatistics(@Parameter(description = "ID курсу") @PathVariable int id) {
+        return new Response<>(HttpStatus.OK, courseService.getCourseWithPassingStatistics(id));
     }
 
     /**

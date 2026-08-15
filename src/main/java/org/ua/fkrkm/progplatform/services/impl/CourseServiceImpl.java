@@ -13,7 +13,6 @@ import org.ua.fkrkm.progplatform.function.*;
 import org.ua.fkrkm.progplatform.utils.ObjectModifier;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
-import org.ua.fkrkm.progplatform.converters.CourseToCourseResponse;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
@@ -123,55 +122,55 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public CourseUsersResponse getCourseUsers(int courseId) {
+    public CourseUsersResponse getCourseUsers(int id) {
         // Отримуємо поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
         // Отримуємо ID користувача
         Integer userId = currentAuthUser.getId();
-        boolean userExistsInCourse = this.checkIfUserExistsInCourse(courseId, userId);
+        boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
             throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
 
         // Отримуємо курс по ID
-        List<Course> courses = courseDao.getById(courseId);
+        List<Course> courses = courseDao.getById(id);
         if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         Course course = courses.getFirst();
 
-        List<Integer> courseUsersId = courseDao.getCourseUsersIdByCourseId(courseId);
+        List<Integer> courseUsersId = courseDao.getCourseUsersIdByCourseId(id);
         // Формуємо список користувачів
         List<UserView> users = courseUsersId.stream()
                 // По ID користувача отримуємо інформацію з бази та створюємо список
                 .map(new GetUserInfo(userDao))
                 .toList();
-        return new CourseUsersResponse(courseId, course.getName(), users);
+        return new CourseUsersResponse(id, course.getName(), users);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AddUserToCourseResponse addUserToCourse(int userId, int courseId) {
-        boolean userExistsInCourse = this.checkIfUserExistsInCourse(courseId, userId);
+    public AddUserToCourseResponse addUserToCourse(int userId, int id) {
+        boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
             throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Додаємо користувача до курсу
-        courseDao.addUserToCourse(courseId, userId);
-        return new AddUserToCourseResponse(courseId, userId);
+        courseDao.addUserToCourse(id, userId);
+        return new AddUserToCourseResponse(id, userId);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public DeleteUserFromCourseResponse deleteUserFromCourse(int userId, int courseId) {
-        boolean userExistsInCourse = this.checkIfUserExistsInCourse(courseId, userId);
+    public DeleteUserFromCourseResponse deleteUserFromCourse(int userId, int id) {
+        boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse)
             throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Видаляємо користувача з курсу
-        courseDao.removeUserFromCourse(courseId, userId);
+        courseDao.removeUserFromCourse(id, userId);
         return new DeleteUserFromCourseResponse(userId);
     }
 
@@ -179,9 +178,9 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkIfUserExistsInCourse(int courseId, int userId) {
+    public boolean checkIfUserExistsInCourse(int id, int userId) {
         // Отримуємо курс по ID
-        List<Course> courses = courseDao.getById(courseId);
+        List<Course> courses = courseDao.getById(id);
         if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         Course course = courses.getFirst();
         // Отримуємо список ID користувачів по ID курсу
@@ -193,20 +192,34 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public CourseResponse getCourseById(int courseId, Integer userId) {
+    public CourseResponse getCourseById(int id) {
         // Заповнюємо объект
         return ObjectModifier.init(new CourseResponse())
                 // Отримуємо курс по ID та заповнюємо объект
-                .apply(new SetCourse(() -> this.courseDao.getById(courseId)))
+                .apply(new SetCourse(() -> this.courseDao.getById(id)))
                 // Встановлюємо модулі по ID курсу
-                .apply(new SetModuleByCourseId(() -> this.moduleDao.getModulesByCourseId(courseId)))
+                .apply(new SetModule(() -> this.moduleDao.getModulesByCourseId(id)))
                 // Встановлюємо теми модулів
-                .apply(new SetModuleTopic(this.topicDao::findAllTopicsByModuleIdList,
-                        () -> this.moduleStatDao.findModuleStatByUserId(userId)))
+                .apply(new SetTopic(this.topicDao::findAllTopicsByModuleIdList))
                 // Встановлюємо тест
-//                    .apply(new SetTopicTest(this.testDao::getByTopicIds))
+//                    .apply(new SetTest(this.testDao::getByTopicIds))
+                // Отримуємо объект
+                .get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CourseResponse getCourseWithPassingStatistics(int id) {
+        User authUser = authUserService.getCurrentAuthUser();
+        CourseResponse course = this.getCourseById(id);
+        // Заповнюємо объект
+        return ObjectModifier.init(course)
+                // Встановлює статус перегляду теми
+                .apply(new SetTopicViewingStatus(() -> this.moduleStatDao.findModuleStatByUserId(authUser.getId())))
                 // Встановлюємо процент проходження модулів
-                .apply(new SetModulePercent(() -> this.moduleStatDao.findModulesStatByUserId(userId)))
+                .apply(new SetModulePercent(() -> this.moduleStatDao.findModulesStatByUserId(authUser.getId())))
                 // Отримуємо объект
                 .get();
     }

@@ -21,6 +21,7 @@ import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformExceptionBadRequest;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
+import org.ua.fkrkm.progplatform.function.RemoveToken;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 import org.ua.fkrkm.progplatform.services.UserServiceI;
@@ -85,14 +86,16 @@ public class UserServiceImpl implements UserServiceI {
     @Override
     public LoginUserResponse login(UserLoginRequest request, HttpServletResponse response) {
         // Шукаємо користувача
-        List<User> user = userDao.findByEmail(request.getEmail());
+        List<User> user = this.userDao.findByEmail(request.getEmail());
         // Перевіряємо, що він існує
         if (user.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         return AuthChain.init(request)
+                // Видаляємо старі Jwt токени користувача з бази якщо вони є
+                .take(new RemoveToken(this.authDao, user.getFirst()))
                 // Перевіряємо хеш пароля
-                .check(new ValidatePasswordHash(passwordEncoder, user.getFirst()))
+                .check(new ValidatePasswordHash(this.passwordEncoder, user.getFirst()))
                 // Генеруємо Jwt токен і готуємо відповідь для клієнта
-                .get(new GenerateJwtTokenAndPrepareResponse(jwtService, user.getFirst(), roleDao, cookiesTokenName, response, authDao));
+                .get(new GenerateJwtTokenAndPrepareResponse(this.jwtService, user.getFirst(), this.roleDao, this.cookiesTokenName, response, this.authDao));
     }
 
     /**
@@ -102,7 +105,7 @@ public class UserServiceImpl implements UserServiceI {
     public LogoutResponse logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         // Перевіряємо, що cookie встановлені
-        if (cookies == null) return new LogoutResponse("TOKEN NO CONTAINED IN COOKIES!");
+        if (cookies == null) return new LogoutResponse("COOKIES IS NOT SET!");
         Optional<Cookie> optionalCookie = Stream.of(cookies)
                 // Намагаємось знайти cookie за ім'ям
                 .filter(cookie -> cookie.getName().equals(cookiesTokenName))
@@ -235,10 +238,10 @@ public class UserServiceImpl implements UserServiceI {
         if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         User user = users.getFirst();
         // Отримуємо роль, на яку будемо міняти
-        List<Integer> roleIds = roleDao.findIdByName(request.getRoleName());
+        List<Role> roles = roleDao.findIdByName(request.getRoleName());
         // Перевіряємо, що роль існує
-        if (roleIds.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.ROLE_NOT_FOUND);
-        Integer roleId = roleIds.getFirst();
+        if (roles.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.ROLE_NOT_FOUND);
+        Integer roleId = roles.getFirst().getId();
         List<Role> newRoles = roleDao.getById(roleId);
         List<Role> oldRoles = roleDao.getById(user.getRoleId());
         if (newRoles.isEmpty() || oldRoles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);

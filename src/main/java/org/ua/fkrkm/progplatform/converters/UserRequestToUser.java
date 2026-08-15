@@ -6,6 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
 import org.ua.fkrkm.proglatformdao.entity.User;
+import org.ua.fkrkm.proglatformdao.entity.Role;
+import org.ua.fkrkm.progplatform.consts.Roles;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatformclientlib.request.*;
@@ -58,8 +60,8 @@ public class UserRequestToUser implements Converter<UserRegistrationRequest, Use
      * @return Integer ID знайденої ролі
      */
     private Integer getRoleId() {
-        List<Integer> roles = roleDao.findIdByName("ROLE_USER");
+        List<Role> roles = roleDao.findIdByName(Roles.USER.getRoleName());
         if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
-        return roles.getFirst();
+        return roles.getFirst().getId();
     }
 }

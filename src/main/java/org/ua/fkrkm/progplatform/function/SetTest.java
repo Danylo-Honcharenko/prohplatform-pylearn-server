@@ -13,11 +13,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class SetTopicTest implements Consumer<CourseResponse> {
+public class SetTest implements Consumer<CourseResponse> {
 
     private final Function<List<Integer>, List<Test>> function;
 
-    public SetTopicTest(Function<List<Integer>, List<Test>> function) {
+    public SetTest(Function<List<Integer>, List<Test>> function) {
         this.function = function;
     }
 

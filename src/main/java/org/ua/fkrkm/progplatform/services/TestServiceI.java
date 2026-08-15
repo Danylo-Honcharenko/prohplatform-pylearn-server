@@ -42,7 +42,7 @@ public interface TestServiceI {
      */
     CheckTestAnswersResultResponse check(CheckTestAnswersRequest request);
     /**
-     * Отримати результати тестування по ID користувача
+     * Отримати результати тестування користувача
      *
      * @return TestResultsResponse відповідь API
      */

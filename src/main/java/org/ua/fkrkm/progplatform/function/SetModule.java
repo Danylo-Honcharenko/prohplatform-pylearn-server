@@ -1,20 +1,18 @@
 package org.ua.fkrkm.progplatform.function;
 
 import org.ua.fkrkm.proglatformdao.entity.Module;
-import org.ua.fkrkm.proglatformdao.entity.ModuleStat;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleView;
-import org.ua.fkrkm.proglatformdao.entity.view.TopicView;
 import org.ua.fkrkm.progplatformclientlib.response.CourseResponse;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class SetModuleByCourseId implements Consumer<CourseResponse> {
+public class SetModule implements Consumer<CourseResponse> {
 
     private final List<Module> modules;
 
-    public SetModuleByCourseId(Supplier<List<Module>> supplier) {
+    public SetModule(Supplier<List<Module>> supplier) {
         this.modules = supplier.get();
     }
 

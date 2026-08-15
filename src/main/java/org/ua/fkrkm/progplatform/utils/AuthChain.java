@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 /**
  * Ланцюг аутентифікації
  */
-public class AuthChain extends ObjectModifier<UserLoginRequest> {
+public class AuthChain extends ObjectModifier<UserLoginRequest>{
     // Запит
     private final UserLoginRequest user;
 
@@ -54,8 +54,19 @@ public class AuthChain extends ObjectModifier<UserLoginRequest> {
      * @return AuthChain ланцюг аутентифікації
      */
     public AuthChain check(Predicate<UserLoginRequest> predicate) {
-        boolean test = predicate.test(user);
+        boolean test = predicate.test(this.user);
         if (!test) throw new ProgPlatformExceptionBadRequest(ErrorConsts.PASSWORD_IS_INCORRECT);
+        return this;
+    }
+
+    /**
+     * Взяти поточний обʼєкт
+     *
+     * @param consumer функція яка бере обʼєкт
+     * @return AuthChain ланцюг аутентифікації
+     */
+    public AuthChain take(Consumer<UserLoginRequest> consumer) {
+        consumer.accept(this.user);
         return this;
     }
 

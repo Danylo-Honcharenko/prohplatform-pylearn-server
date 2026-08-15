@@ -23,6 +23,6 @@ public class CourseControllerTest {
 
     @Test
     public void getCourseByIdTest() {
-        assertNotNull(courseController.getCourseById(1, 1));
+        assertNotNull(courseController.getCourseById(1));
     }
 }

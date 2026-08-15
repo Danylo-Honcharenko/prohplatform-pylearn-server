@@ -84,7 +84,7 @@ public class TestController {
     }
 
     /**
-     * Отримати всі результати тестування по ID користувача
+     * Отримати всі результати тестування користувача
      *
      * @return Response<TestResultsResponse> відповідь API
      */

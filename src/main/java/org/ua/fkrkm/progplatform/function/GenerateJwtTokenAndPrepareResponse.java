@@ -75,10 +75,10 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
         String token = tokenInfo.getToken();
         // Час коли токен затухне
         Date tokenExpirationDate = tokenInfo.getExpired();
-        // Встановлюємо токен в Cookie відповіді
-        this.setJwtTokenToCookie(token);
         // Зберігаємо токен в базі активних токенів
         this.saveTokenInDatabase(token, user.getId(), tokenExpirationDate);
+        // Встановлюємо токен в Cookie відповіді
+        this.setJwtTokenToCookie(token);
         // Заповняємо відповідь
         return LoginUserResponse.builder()
                 .id(user.getId())

@@ -37,42 +37,48 @@ public interface CourseServiceI {
     /**
      * Отримати всіх користувачів курсу
      *
-     * @param courseId ID курсу
+     * @param id ID курсу
      * @return CourseUsersResponse відповідь API
      */
-    CourseUsersResponse getCourseUsers(int courseId);
+    CourseUsersResponse getCourseUsers(int id);
     /**
      * Додати користувача до курсу
      *
      * @param userId ID користувача
-     * @param courseId ID курсу
+     * @param id ID курсу
      * @return AddUserToCourseResponse відповідь API
      */
-    AddUserToCourseResponse addUserToCourse(int userId, int courseId);
+    AddUserToCourseResponse addUserToCourse(int userId, int id);
     /**
      * Видалити користувача з курсу
      *
      * @param userId ID користувача
-     * @param courseId ID курсу
+     * @param id ID курсу
      * @return DeleteUserFromCourseResponse відповідь API
      */
-    DeleteUserFromCourseResponse deleteUserFromCourse(int userId, int courseId);
+    DeleteUserFromCourseResponse deleteUserFromCourse(int userId, int id);
     /**
      * Перевіряє що користувач присутній в курсе
      *
-     * @param courseId ID курсу
+     * @param id ID курсу
      * @param userId ID користувача
      * @return boolean true/false
      */
-    boolean checkIfUserExistsInCourse(int courseId, int userId);
+    boolean checkIfUserExistsInCourse(int id, int userId);
     /**
      * Отримати курс по ID
      *
-     * @param courseId ID курсу
-     * @param userId ID користувача
+     * @param id ID курсу
      * @return CourseResponse відповідь API
      */
-    CourseResponse getCourseById(int courseId, Integer userId);
+    CourseResponse getCourseById(int id);
+    /**
+     * Отримати курс зі статистикою проходження користувача
+     *
+     * @param id ID курсу
+     * @return CourseResponse відповідь API
+     */
+    CourseResponse getCourseWithPassingStatistics(int id);
     /**
      * Отримати всі курси користувача
      *
