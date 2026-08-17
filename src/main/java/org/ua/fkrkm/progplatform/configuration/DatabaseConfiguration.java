@@ -14,8 +14,6 @@ import javax.sql.DataSource;
 @Configuration
 public class DatabaseConfiguration {
 
-//    @Value("${db.driver}")
-//    private String driverClassName;
     @Value("${db.url}")
     private String url;
     @Value("${db.username}")

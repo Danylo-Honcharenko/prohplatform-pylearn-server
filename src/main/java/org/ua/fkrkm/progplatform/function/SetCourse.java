@@ -9,22 +9,31 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Проставляє дані про курс
+ */
 public class SetCourse implements Consumer<CourseResponse> {
+    // Курс
+    private final Course course;
 
-    private final List<Course> courses;
-
-    public SetCourse(Supplier<List<Course>> course) {
-        this.courses = course.get();
+    /**
+     * Конструктор
+     *
+     * @param course курс
+     */
+    public SetCourse(Course course) {
+        this.course = course;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void accept(CourseResponse courseResponse) {
-        if (this.courses.isEmpty()) throw new ProgPlatformException(ErrorConsts.COURSE_NOT_FOUND);
-        Course course = courses.getFirst();
-        courseResponse.setId(course.getId());
-        courseResponse.setName(course.getName());
-        courseResponse.setDescription(course.getDescription());
-        courseResponse.setCreated(course.getCreated());
-        courseResponse.setUpdated(course.getUpdated());
+        courseResponse.setId(this.course.getId());
+        courseResponse.setName(this.course.getName());
+        courseResponse.setDescription(this.course.getDescription());
+        courseResponse.setCreated(this.course.getCreated());
+        courseResponse.setUpdated(this.course.getUpdated());
     }
 }

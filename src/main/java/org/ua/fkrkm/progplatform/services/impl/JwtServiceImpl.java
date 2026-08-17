@@ -28,8 +28,8 @@ public class JwtServiceImpl implements JwtServiceI {
     private long jwtExpiration;
 
     @Override
-    public GeneratedToken generateToken(UserDetails user) {
-        return this.buildToken(new HashMap<>(), user, jwtExpiration);
+    public GeneratedToken generateToken(String email) {
+        return this.buildToken(new HashMap<>(), email, jwtExpiration);
     }
 
     @Override
@@ -49,11 +49,11 @@ public class JwtServiceImpl implements JwtServiceI {
         return this.jwtExpiration;
     }
 
-    private GeneratedToken buildToken(Map<String, Object> extraClaims, UserDetails user, long expiration) {
+    private GeneratedToken buildToken(Map<String, Object> extraClaims, String email, long expiration) {
         Date expirationDate = new Date(System.currentTimeMillis() + expiration);
         String token = Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(user.getUsername())
+                .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(expirationDate)
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

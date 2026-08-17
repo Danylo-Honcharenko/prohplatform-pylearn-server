@@ -28,18 +28,14 @@ public class JwtServiceTest {
 
     @Test
     public void generateTokenTest() {
-        User.UserBuilder buildUser = withUsername("test.test@gmail.com");
-        buildUser.password("12345678");
-        String token = jwtService.generateToken(buildUser.build()).getToken();
+        String token = jwtService.generateToken("test.test@gmail.com").getToken();
         assertNotNull(token);
     }
 
     @Test
     public void extractTest() {
         String userEmail = "test.test@gmail.com";
-        User.UserBuilder buildUser = withUsername(userEmail);
-        buildUser.password("12345678");
-        String token = jwtService.generateToken(buildUser.build()).getToken();
+        String token = jwtService.generateToken(userEmail).getToken();
         String userName = jwtService.extractUserName(token);
         assertEquals(userEmail, userName);
     }
@@ -49,7 +45,7 @@ public class JwtServiceTest {
         String userEmail = "test.test@gmail.com";
         User.UserBuilder buildUser = withUsername(userEmail);
         buildUser.password("12345678");
-        String token = jwtService.generateToken(buildUser.build()).getToken();
+        String token = jwtService.generateToken(userEmail).getToken();
 
         assertTrue(jwtService.isTokenValid(token, buildUser.build()));
     }

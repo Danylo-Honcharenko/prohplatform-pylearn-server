@@ -91,7 +91,7 @@ public class CourseController {
             @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
     })
     @ResponseBody
-    @GetMapping("/{id}/stat")
+    @GetMapping("/{id}/user/stat")
     public Response<CourseResponse> getCourseWithPassingStatistics(@Parameter(description = "ID курсу") @PathVariable int id) {
         return new Response<>(HttpStatus.OK, courseService.getCourseWithPassingStatistics(id));
     }

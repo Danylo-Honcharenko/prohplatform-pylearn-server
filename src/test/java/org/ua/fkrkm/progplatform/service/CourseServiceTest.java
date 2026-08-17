@@ -7,7 +7,6 @@ import org.ua.fkrkm.proglatformdao.dao.*;
 import org.ua.fkrkm.proglatformdao.dao.impl.*;
 import org.ua.fkrkm.proglatformdao.entity.Course;
 import org.ua.fkrkm.proglatformdao.entity.User;
-import org.ua.fkrkm.progplatform.converters.CourseToCourseResponse;
 import org.ua.fkrkm.progplatform.converters.CourseToCreateCourseResponse;
 import org.ua.fkrkm.progplatform.converters.CreateCourseRequestToCourse;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;

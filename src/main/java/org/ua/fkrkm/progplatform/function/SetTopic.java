@@ -8,29 +8,39 @@ import org.ua.fkrkm.progplatformclientlib.response.CourseResponse;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.stream.IntStream;
 
+/**
+ * Проставляє теми
+ */
 public class SetTopic implements Consumer<CourseResponse> {
+    // Теми
+    private final List<Topic> topics;
 
-    private final Function<List<Integer>, List<Topic>> function;
-
-    public SetTopic(Function<List<Integer>, List<Topic>> function) {
-        this.function = function;
+    /**
+     * Конструктор
+     *
+     * @param topics теми
+     */
+    public SetTopic(List<Topic> topics) {
+        this.topics = topics;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void accept(CourseResponse courseResponse) {
         List<ModuleView> modules = courseResponse.getModules();
         if (!CollectionUtils.isEmpty(modules)) {
-            List<Integer> modulesIds = modules.stream()
-                    .map(ModuleView::getId)
-                    .toList();
-            List<TopicView> topicViews = function.apply(modulesIds).stream()
+            List<TopicView> topicViews = topics.stream()
                     .map(this::topicToTopicView)
                     .toList();
             List<ModuleView> moduleViews = modules.stream()
                     .peek((module) -> this.setTopic(module, topicViews))
+                    .peek(this::countingTopicsPage)
                     .toList();
             courseResponse.setModules(moduleViews);
         }
@@ -48,31 +58,39 @@ public class SetTopic implements Consumer<CourseResponse> {
                 .name(topic.getName())
                 .description(topic.getDescription())
                 .moduleId(topic.getModuleId())
-//                .done(this.checkIsTopicDone(topic.getId()))
                 .created(topic.getCreated())
                 .updated(topic.getUpdated())
                 .build();
     }
 
-//    /**
-//     * Перевіряємо статус перегляду теми true - переглянута/пройдена, false - не переглянуто
-//     *
-//     * @param topicId ID теми
-//     * @return Boolean true/false
-//     */
-//    private Boolean checkIsTopicDone(int topicId) {
-//        if (this.moduleStats.isEmpty()) return false;
-//        for (ModuleStat moduleStat : this.moduleStats) {
-//            if (moduleStat.getTopicId() == topicId) return true;
-//        }
-//        return false;
-//    }
-
+    /**
+     * Проставляє теми
+     *
+     * @param moduleView модуль
+     * @param topicViews теми
+     */
     private void setTopic(ModuleView moduleView, List<TopicView> topicViews) {
+        // Послідовність
+        AtomicInteger sequence = new AtomicInteger(0);
         List<TopicView> topics = topicViews.stream()
                 .filter((topic) -> topic.getModuleId().equals(moduleView.getId()))
+                // Сортує по ID
                 .sorted(Comparator.comparingInt(TopicView::getId))
+                .peek((topicView) -> topicView.setPage(sequence.incrementAndGet()))
                 .toList();
         moduleView.setTopics(topics);
+    }
+
+    /**
+     * Рахує номери сторінок тем у модулі
+     *
+     * @param moduleView модуль
+     */
+    private void countingTopicsPage(ModuleView moduleView) {
+        int topicAmount = moduleView.getTopics().size();
+        List<Integer> pages = IntStream.range(1, topicAmount  + 1)
+                .boxed()
+                .toList();
+        moduleView.setPages(pages);
     }
 }

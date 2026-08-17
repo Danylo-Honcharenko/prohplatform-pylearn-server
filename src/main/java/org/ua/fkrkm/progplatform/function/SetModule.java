@@ -6,16 +6,26 @@ import org.ua.fkrkm.progplatformclientlib.response.CourseResponse;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
+/**
+ * Проставляє модулі
+ */
 public class SetModule implements Consumer<CourseResponse> {
-
+    // Модулі
     private final List<Module> modules;
 
-    public SetModule(Supplier<List<Module>> supplier) {
-        this.modules = supplier.get();
+    /**
+     * Конструктор
+     *
+     * @param modules модулі
+     */
+    public SetModule(List<Module> modules) {
+        this.modules = modules;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void accept(CourseResponse courseResponse) {
         if (!this.modules.isEmpty()) {

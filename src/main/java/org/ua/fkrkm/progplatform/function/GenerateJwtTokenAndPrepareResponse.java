@@ -1,29 +1,24 @@
 package org.ua.fkrkm.progplatform.function;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Auth;
-import org.ua.fkrkm.proglatformdao.entity.Role;
 import org.ua.fkrkm.proglatformdao.entity.User;
+import org.ua.fkrkm.progplatform.consts.Roles;
 import org.ua.fkrkm.progplatform.dto.GeneratedToken;
-import org.ua.fkrkm.progplatformclientlib.request.*;
-import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
+import org.ua.fkrkm.progplatformclientlib.request.*;
+import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 
-import java.text.ParseException;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
-
-import static org.springframework.security.core.userdetails.User.*;
 
 /**
  * Клас для генерації токену і підготовки відповіді для клиента
@@ -96,9 +91,7 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @return Map<String, String> інформація згенерованому токену
      */
     private GeneratedToken getGeneratedJwtTokenInfo(User user) {
-        UserBuilder buildUser = withUsername(user.getEmail());
-        buildUser.password(user.getPassword());
-        return jwtService.generateToken(buildUser.build());
+        return jwtService.generateToken(user.getEmail());
     }
 
     /**
@@ -126,10 +119,16 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
      * @return String ім'я ролі
      */
     private String getRoleNameById(int id) {
-        // Отримуємо роль по ID
-        List<Role> roles = roleDao.getById(id);
-        if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
-        return roles.getFirst().getName();
+        String name = Roles.getNameById((long) id);
+
+        if (StringUtils.isEmpty(name)) {
+            return this.roleDao.getById(id).stream()
+                    .findFirst()
+                    .orElseThrow(() -> new ProgPlatformNotFoundException(ErrorConsts.ROLE_NOT_FOUND))
+                    .getName();
+        }
+
+        return name;
     }
 
     /**
