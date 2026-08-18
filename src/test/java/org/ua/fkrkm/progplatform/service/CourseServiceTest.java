@@ -30,7 +30,7 @@ public class CourseServiceTest {
     private final Converter<CreateCourseRequest, Course> createCourseRequestCourseConverter = new CreateCourseRequestToCourse();
     private final Converter<Course, CreateCourseResponse> createCourseResponseCourseConverter = new CourseToCreateCourseResponse();
     private final AuthUserServiceI authUserService = mock(AuthUserServiceImpl.class);
-    private final Converter<Course, CourseResponse> courseResponseCourseConverter = mock(CourseToCourseResponse.class);
+//    private final Converter<Course, CourseResponse> courseResponseCourseConverter = mock(CourseToCourseResponse.class);
     private final ModuleDaoI moduleDao = mock(ModuleDaoImpl.class);
     private final TopicDaoI topicDao = mock(TopicDaoImpl.class);
     private final ModuleStatDaoI moduleStatDao = mock(ModuleStatImpl.class);
@@ -44,7 +44,7 @@ public class CourseServiceTest {
                 createCourseRequestCourseConverter,
                 createCourseResponseCourseConverter,
                 authUserService,
-                courseResponseCourseConverter,
+//                courseResponseCourseConverter,
                 moduleDao,
                 topicDao,
                 moduleStatDao

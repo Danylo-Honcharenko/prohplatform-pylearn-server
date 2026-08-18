@@ -6,10 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.ua.fkrkm.proglatformdao.dao.*;
 import org.ua.fkrkm.proglatformdao.entity.Course;
-import org.ua.fkrkm.proglatformdao.entity.Module;
-import org.ua.fkrkm.proglatformdao.entity.Topic;
 import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
+import org.ua.fkrkm.progplatform.converters.MultiConverter;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.function.*;
 import org.ua.fkrkm.progplatform.utils.ObjectModifier;
@@ -21,7 +20,6 @@ import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.CourseServiceI;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Сервіс для роботи з курсами
@@ -39,14 +37,10 @@ public class CourseServiceImpl implements CourseServiceI {
     private final Converter<Course, CreateCourseResponse> createCourseResponseCourseConverter;
     // Сервіс для роботи з поточним користувачем в системі
     private final AuthUserServiceI authUserService;
-    // DAO для роботи з модулями
-    private final ModuleDaoI moduleDao;
-    // DAO для роботи з темами
-    private final TopicDaoI topicDao;
     // DAO для роботи зі статистикой по модулю
     private final ModuleStatDaoI moduleStatDao;
-    // DAO для роботи з тестами
-//    private final TestDaoI testDao;
+    // Конвертор
+    private final MultiConverter<Course, CourseResponse> courseToCourseResponseConverter;
 
     /**
      * {@inheritDoc}
@@ -112,7 +106,7 @@ public class CourseServiceImpl implements CourseServiceI {
     @Override
     public GetAllCoursesResponse getAllCourses() {
         List<Course> courses = courseDao.getAll();
-        List<CourseResponse> courseResponses = this.buildResponse(courses);
+        List<CourseResponse> courseResponses = this.courseToCourseResponseConverter.convert(courses);
         return new GetAllCoursesResponse(courseResponses);
     }
 
@@ -195,12 +189,8 @@ public class CourseServiceImpl implements CourseServiceI {
         Course course = this.courseDao.getById(id).stream()
                 .findFirst()
                 .orElseThrow(() -> new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND));
-        // Отримуємо модулі по ID курсу
-        List<Module> modules = this.moduleDao.getModulesByCourseId(id);
-        // Отримуємо теми по модулям
-        List<Topic> topics = this.getTopicsByModules(modules);
 
-        return this.buildResponse(course, modules, topics);
+        return this.courseToCourseResponseConverter.convert(course);
     }
 
     /**
@@ -210,7 +200,7 @@ public class CourseServiceImpl implements CourseServiceI {
     public CourseResponse getCourseWithPassingStatistics(int id) {
         User authUser = authUserService.getCurrentAuthUser();
         CourseResponse course = this.getCourseById(id);
-        // Заповнюємо объект
+        // Заповнюємо обʼєкт
         return ObjectModifier.init(course)
                 // Встановлює статус перегляду теми
                 .apply(new SetTopicViewingStatus(() -> this.moduleStatDao.findModuleStatByUserId(authUser.getId())))
@@ -228,84 +218,9 @@ public class CourseServiceImpl implements CourseServiceI {
         User authUser = authUserService.getCurrentAuthUser();
         // Отримуємо всі курси користувача
         List<Course> courses = courseDao.getCoursesIdByUserId(authUser.getId());
-        // Будуємо відповідь
-        List<CourseResponse> courseResponses = this.buildResponse(courses);
+
+        List<CourseResponse> courseResponses = this.courseToCourseResponseConverter.convert(courses);
 
         return new UserCourseResponse(courseResponses);
-    }
-
-    /**
-     * Отримати теми модулів
-     *
-     * @param modules модулі
-     * @return List<Topic> теми
-     */
-    private List<Topic> getTopicsByModules(List<Module> modules) {
-        if (modules.isEmpty()) return new ArrayList<>();
-
-        List<Integer> moduleIds = modules.stream()
-                .map(Module::getId)
-                .toList();
-
-        return this.topicDao.findAllTopicsByModuleIdList(moduleIds);
-    }
-
-    /**
-     * Зібрати відповідь
-     *
-     * @param courses курси
-     * @return List<CourseResponse> зібрана відповідь
-     */
-    private List<CourseResponse> buildResponse(List<Course> courses) {
-
-        Map<Integer, Course> courseIdToCourse = courses.stream()
-                .collect(Collectors.toMap(Course::getId, (course) -> course));
-
-        Map<Integer, List<Module>> courseIdToModule = courses.stream()
-                .flatMap((course) -> this.moduleDao.getModulesByCourseId(course.getId()).stream())
-                .collect(Collectors.groupingBy(Module::getCourseId));
-
-        List<Module> modules = courseIdToModule.values().stream()
-                .flatMap(Collection::stream)
-                .toList();
-
-        Map<Integer, List<Topic>> moduleIdToTopic = this.getTopicsByModules(modules).stream()
-                .collect(Collectors.groupingBy(Topic::getModuleId));
-
-        return courseIdToModule.keySet().stream()
-                .map((courseId) -> {
-                    Course course = courseIdToCourse.get(courseId);
-                    List<Module> moduleList = courseIdToModule.get(courseId);
-
-                    List<Topic> topics = moduleList.stream()
-                            .map((module) -> moduleIdToTopic.get(module.getId()))
-                            .flatMap(Collection::stream)
-                            .toList();
-
-                    return buildResponse(course, moduleList, topics);
-                }).toList();
-    }
-
-    /**
-     * Зібрати відповідь
-     *
-     * @param course курс
-     * @param modules модулі до курсу
-     * @param topics теми модулів
-     * @return CourseResponse зібрана відповідь
-     */
-    private CourseResponse buildResponse(Course course, List<Module> modules, List<Topic> topics) {
-        // Заповнюємо об'єкт
-        return ObjectModifier.init(new CourseResponse())
-                // Проставляємо курс
-                .apply(new SetCourse(course))
-                // Проставляємо модулі
-                .apply(new SetModule(modules))
-                // Проставляємо теми
-                .apply(new SetTopic(topics))
-                // Встановлюємо тест
-//                    .apply(new SetTest(this.testDao::getByTopicIds))
-                // Отримуємо объект
-                .get();
     }
 }
