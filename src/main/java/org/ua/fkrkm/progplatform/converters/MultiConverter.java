@@ -18,6 +18,5 @@ public interface MultiConverter<S, T> extends Converter<S, T> {
      * @param source список джерело
      * @return List<T> список призначення
      */
-    @Nullable
     List<T> convert(List<S> source);
 }

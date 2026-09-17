@@ -7,8 +7,10 @@ import org.ua.fkrkm.proglatformdao.dao.*;
 import org.ua.fkrkm.proglatformdao.dao.impl.*;
 import org.ua.fkrkm.proglatformdao.entity.Course;
 import org.ua.fkrkm.proglatformdao.entity.User;
+import org.ua.fkrkm.progplatform.converters.CourseToCourseResponse;
 import org.ua.fkrkm.progplatform.converters.CourseToCreateCourseResponse;
 import org.ua.fkrkm.progplatform.converters.CreateCourseRequestToCourse;
+import org.ua.fkrkm.progplatform.converters.MultiConverter;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.CourseServiceI;
 import org.ua.fkrkm.progplatform.services.impl.AuthUserServiceImpl;
@@ -30,11 +32,11 @@ public class CourseServiceTest {
     private final Converter<CreateCourseRequest, Course> createCourseRequestCourseConverter = new CreateCourseRequestToCourse();
     private final Converter<Course, CreateCourseResponse> createCourseResponseCourseConverter = new CourseToCreateCourseResponse();
     private final AuthUserServiceI authUserService = mock(AuthUserServiceImpl.class);
-//    private final Converter<Course, CourseResponse> courseResponseCourseConverter = mock(CourseToCourseResponse.class);
     private final ModuleDaoI moduleDao = mock(ModuleDaoImpl.class);
     private final TopicDaoI topicDao = mock(TopicDaoImpl.class);
     private final ModuleStatDaoI moduleStatDao = mock(ModuleStatImpl.class);
-    private final TestDaoI testDao = mock(TestDaoImpl.class);
+//    private final TestDaoI testDao = mock(TestDaoImpl.class);
+    private final MultiConverter<Course, CourseResponse> courseToCourseResponseConverter = new CourseToCourseResponse(moduleDao, topicDao);
 
     @BeforeEach
     public void setUp() {
@@ -44,10 +46,8 @@ public class CourseServiceTest {
                 createCourseRequestCourseConverter,
                 createCourseResponseCourseConverter,
                 authUserService,
-//                courseResponseCourseConverter,
-                moduleDao,
-                topicDao,
-                moduleStatDao
+                moduleStatDao,
+                courseToCourseResponseConverter
         );
     }
 

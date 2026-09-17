@@ -11,8 +11,9 @@ import org.springframework.stereotype.Service;
 import org.ua.fkrkm.progplatform.dto.GeneratedToken;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,11 +53,11 @@ public class JwtServiceImpl implements JwtServiceI {
     private GeneratedToken buildToken(Map<String, Object> extraClaims, String email, long expiration) {
         Date expirationDate = new Date(System.currentTimeMillis() + expiration);
         String token = Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(expirationDate)
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .claims(extraClaims)
+                .subject(email)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(expirationDate)
+                .signWith(getSignInKey())
                 .compact();
 
         return new GeneratedToken(token, expirationDate);
@@ -76,15 +77,15 @@ public class JwtServiceImpl implements JwtServiceI {
     }
 
     private Claims extractAllClaim(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignInKey())
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
-    private Key getSignInKey() {
-        byte[] decode = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(decode);
+    private SecretKey getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(this.secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

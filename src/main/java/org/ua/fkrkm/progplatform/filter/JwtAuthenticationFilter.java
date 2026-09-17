@@ -1,6 +1,5 @@
 package org.ua.fkrkm.progplatform.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -8,11 +7,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,11 +21,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Auth;
@@ -34,17 +33,17 @@ import org.ua.fkrkm.progplatform.exceptions.RevokedJwtAuthenticationException;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 import org.ua.fkrkm.progplatformclientlib.response.ErrorResponse;
 import org.ua.fkrkm.progplatformclientlib.response.Response;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Фільтр для аутентифікації запиту
  */
+@Slf4j
 @Component
 @Order(2)
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -57,22 +56,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final String cookiesTokenName;
     // DAO для роботи з аунтифікованими користувачами
     private final AuthDaoI authDao;
-    // Логер
-    private final static Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final ObjectMapper objectMapper;
 
     private final RequestMatcher skipJwtAuthentication = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/user/login", "POST"),
-            new AntPathRequestMatcher("/api/user/registration", "POST"),
-            new AntPathRequestMatcher("/api/user/updatePassword", "PUT")
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/user/login"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/user/registration"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.PUT, "/api/user/updatePassword")
     );
 
     /**
      * Конструктор
      *
      * @param jwtService Сервіс для роботи з Jwt токеном
-     * @param userDetailsService Сервіс з деталями про користувача
+     * @param userDetailsService Сервіс із деталями про користувача
      * @param cookiesTokenName Назва cookies в якому може зберігатися токен
      * @param authDao DAO для роботи з аунтифікованими користувачами
      */
@@ -92,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * {@inheritDoc}
      */
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return skipJwtAuthentication.matches(request);
     }
 
@@ -100,7 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * {@inheritDoc}
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
             String token = this.getJwtToken(request);
 
@@ -238,7 +235,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param exception помилка
      */
     private void logError(RuntimeException exception) {
-        LOGGER.error("Error: {}, Trace UUID: {}", exception.getMessage(), MDC.get("msid"));
+        log.error("Error: {}, Trace UUID: {}", exception.getMessage(), MDC.get("msid"));
     }
 
     /**

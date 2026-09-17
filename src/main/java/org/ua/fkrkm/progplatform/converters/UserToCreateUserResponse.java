@@ -1,8 +1,7 @@
 package org.ua.fkrkm.progplatform.converters;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
@@ -17,13 +16,12 @@ import java.util.List;
 /**
  * Клас конвертор "User" в "CreateUserResponse"
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserToCreateUserResponse implements Converter<User, CreateUserResponse> {
     // DAO для роботи з ролями
     private final RoleDaoI roleDao;
-    // Логування
-    private final static Logger logger = LoggerFactory.getLogger(UserToCreateUserResponse.class);
 
     /**
      * Метод конвертації
@@ -52,7 +50,7 @@ public class UserToCreateUserResponse implements Converter<User, CreateUserRespo
     private String getRoleName(int roleId) {
         List<Role> roles = roleDao.getById(roleId);
         if (roles.isEmpty()) {
-            logger.warn("Не знайдено ролі з ID: {}", roleId);
+            log.warn("Не знайдено ролі з ID: {}", roleId);
             throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
         }
         Role role = roles.getFirst();

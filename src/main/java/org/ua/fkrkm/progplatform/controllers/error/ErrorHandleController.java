@@ -1,9 +1,6 @@
 package org.ua.fkrkm.progplatform.controllers.error;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,10 +20,9 @@ import java.util.Map;
 /**
  * Клас можливих помилок API
  */
+@Slf4j
 @RestControllerAdvice
 public class ErrorHandleController {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(ErrorHandleController.class);
 
     /**
      * Помилка серверу
@@ -37,7 +33,7 @@ public class ErrorHandleController {
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Response<ErrorResponse> error(Exception ex) {
-        LOGGER.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
+        log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
         return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR, new ErrorResponse(
                 "Помилка серверу", "Помилка серверу. Спробуйте ще раз", MDC.get("msid")
         ));
@@ -52,7 +48,7 @@ public class ErrorHandleController {
     @ExceptionHandler(value = ProgPlatformException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Response<ErrorResponse> errorProg(ProgPlatformException ex) {
-        LOGGER.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
+        log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
         return new Response<>(HttpStatus.BAD_REQUEST, new ErrorResponse(
                 "Помилка", ex.getMessage(), MDC.get("msid")
         ));
@@ -67,7 +63,7 @@ public class ErrorHandleController {
     @ExceptionHandler(value = ProgPlatformExceptionBadRequest.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Response<ErrorResponse> errorProg(ProgPlatformExceptionBadRequest ex) {
-        LOGGER.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
+        log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
         return new Response<>(HttpStatus.BAD_REQUEST, new ErrorResponse(
                 "Помилка", ex.getMessage(), MDC.get("msid")
         ));
@@ -82,7 +78,7 @@ public class ErrorHandleController {
     @ExceptionHandler(value = ProgPlatformNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Response<ErrorResponse> errorProgNotFound(ProgPlatformNotFoundException ex) {
-        LOGGER.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
+        log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
         return new Response<>(HttpStatus.NOT_FOUND, new ErrorResponse(
                 "Не знайдено об'єкт", ex.getMessage(), MDC.get("msid")
         ));
@@ -97,7 +93,7 @@ public class ErrorHandleController {
     @ExceptionHandler(value = AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Response<ErrorResponse> accessDenied(AccessDeniedException e) {
-        LOGGER.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), e.getMessage(), e);
+        log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), e.getMessage(), e);
         return new Response<>(HttpStatus.FORBIDDEN, new ErrorResponse(
                 "Відмовлено в доступі", "У вас не має доступу до ресурсу", MDC.get("msid")
         ));

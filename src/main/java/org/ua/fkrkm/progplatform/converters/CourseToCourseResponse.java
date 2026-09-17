@@ -35,7 +35,6 @@ public class CourseToCourseResponse implements MultiConverter<Course, CourseResp
     /**
      * {@inheritDoc}
      */
-    @Nullable
     @Override
     public List<CourseResponse> convert(List<Course> source) {
         return this.convertList(source);
@@ -44,7 +43,6 @@ public class CourseToCourseResponse implements MultiConverter<Course, CourseResp
     /**
      * {@inheritDoc}
      */
-    @Nullable
     @Override
     public CourseResponse convert(Course course) {
         // Отримуємо модулі по ID курсу
