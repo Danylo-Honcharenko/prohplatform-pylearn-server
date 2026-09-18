@@ -3,14 +3,10 @@ package org.ua.fkrkm.progplatform.configuration;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,7 +23,6 @@ import org.ua.fkrkm.progplatform.filter.config.RestAuthenticationEntryPoint;
 @AllArgsConstructor
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfig corsConfig;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
@@ -75,8 +70,9 @@ public class SecurityConfig {
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement((sm)
+                        -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(c -> c.configurationSource(corsConfig.getCorsConfigSource()))
-                .authenticationProvider(getAuthenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint(this.restAuthenticationEntryPoint)
@@ -95,29 +91,5 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder getPasswordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    /**
-     * Менеджер аутентифікації
-     *
-     * @param config конфігурація аутентифікації
-     * @return AuthenticationManager менеджер аутентифікації
-     * @throws Exception помилка
-     */
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    /**
-     * Провайдер аутентифікації
-     *
-     * @return AuthenticationProvider провайдер аутентифікації
-     */
-    @Bean
-    public AuthenticationProvider getAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(this.userDetailsService);
-        provider.setPasswordEncoder(getPasswordEncoder());
-        return provider;
     }
 }
