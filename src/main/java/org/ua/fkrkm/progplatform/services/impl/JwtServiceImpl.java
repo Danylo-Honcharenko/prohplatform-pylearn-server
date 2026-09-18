@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
+/**
+ * Класс для генерації та перевірки токенів
+ */
 @Service
 public class JwtServiceImpl implements JwtServiceI {
 
@@ -26,6 +29,9 @@ public class JwtServiceImpl implements JwtServiceI {
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TokenInfo generateToken(Long userId, String email, UUID sid) {
         Map<String, Object> claims = new HashMap<>();
@@ -35,6 +41,9 @@ public class JwtServiceImpl implements JwtServiceI {
         return this.buildToken(claims, userId, jwtExpiration);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isTokenValid(String token, UserDetails user) {
         String userName = this.extractUserName(token);
@@ -42,27 +51,47 @@ public class JwtServiceImpl implements JwtServiceI {
                 && !isTokenExpired(token));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String extractUserName(String token) {
         return this.extractClaim(token, (claims) -> claims.get("email", String.class));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Long extractUserId(String token) {
         String id = this.extractClaim(token, Claims::getSubject);
         return Long.valueOf(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String extractSid(String token) {
         return this.extractClaim(token, (claims) -> claims.get("sid", String.class));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Long getExpirationTime() {
         return this.jwtExpiration;
     }
 
+    /**
+     * Будує токен
+     *
+     * @param extraClaims додаткові клімки
+     * @param userId ID користувача
+     * @param expiration час дії токена
+     * @return TokenInfo інформація про токен
+     */
     private TokenInfo buildToken(Map<String, Object> extraClaims, Long userId, long expiration) {
         Date expirationDate = new Date(System.currentTimeMillis() + expiration);
         Date issuedAt = new Date(System.currentTimeMillis());
@@ -78,19 +107,45 @@ public class JwtServiceImpl implements JwtServiceI {
         return new TokenInfo(token, (String) extraClaims.get("sid"), issuedAt, expirationDate);
     }
 
+    /**
+     * Перевіряє чи токен протух
+     *
+     * @param token токен
+     * @return boolean результат перевірки
+     */
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
+    /**
+     * Отримує дату протухання токена
+     *
+     * @param token токен
+     * @return Date дата протухання токена
+     */
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    /**
+     * Отримує клімку з токена
+     *
+     * @param token токен
+     * @param claimsResolver функція для отримання клімки
+     * @param <T> тип клімки
+     * @return T клімка
+     */
     private  <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = extractAllClaim(token);
         return claimsResolver.apply(claims);
     }
 
+    /**
+     * Отримує всі клімки з токена
+     *
+     * @param token токен
+     * @return Claims всі клімки
+     */
     private Claims extractAllClaim(String token) {
         return Jwts.parser()
                 .verifyWith(getSignInKey())
@@ -99,6 +154,11 @@ public class JwtServiceImpl implements JwtServiceI {
                 .getPayload();
     }
 
+    /**
+     * Отримує ключ для підпису токена
+     *
+     * @return SecretKey ключ для підпису токена
+     */
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(this.secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
