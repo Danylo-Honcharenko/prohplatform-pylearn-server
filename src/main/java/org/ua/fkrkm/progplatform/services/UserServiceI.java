@@ -54,18 +54,17 @@ public interface UserServiceI {
     /**
      * Отримання користувача по заданим параметрам
      *
-     * @param id ID користувача
      * @param email Email користувача
      * @return UserResponse відповідь API
      */
-    UserResponse getUserByParams(Integer id, String firstName, String lastName, String email);
+    UserResponse getUserByParams(String firstName, String lastName, String email);
     /**
      * Видалити користувача по ID
      *
      * @param id ID користувача
      * @return DeleteUserResponse відповідь API
      */
-    DeleteUserResponse delete(int id);
+    DeleteUserResponse delete(Long id);
     /**
      * Отримання всіх користувачів
      *

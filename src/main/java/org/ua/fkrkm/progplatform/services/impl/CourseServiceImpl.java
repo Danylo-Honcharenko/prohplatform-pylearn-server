@@ -52,7 +52,7 @@ public class CourseServiceImpl implements CourseServiceI {
         User currentAuthUser = authUserService.getCurrentAuthUser();
         Course course = createCourseRequestCourseConverter.convert(request);
         // Створюємо курс в базі
-        int id = courseDao.create(course);
+        Long id = (long) courseDao.create(course);
         course.setId(id);
         // Додаємо того хто створював курс в цей же курс
         courseDao.addUserToCourse(id, currentAuthUser.getId());
@@ -67,7 +67,7 @@ public class CourseServiceImpl implements CourseServiceI {
         // Отримуємо поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
         // Отримуємо ID користувача
-        Integer userId = currentAuthUser.getId();
+        Long userId = currentAuthUser.getId();
         boolean userExistsInCourse = checkIfUserExistsInCourse(request.getId(), userId);
         // Перевіряємо, що поточний користувач є в списку користувачів курсу
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
@@ -91,7 +91,7 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public DeleteCourseResponse delete(int id) {
+    public DeleteCourseResponse delete(Long id) {
         // Перевіряємо, що курс існує
         List<Course> courses = courseDao.getById(id);
         if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
@@ -114,11 +114,11 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public CourseUsersResponse getCourseUsers(int id) {
+    public CourseUsersResponse getCourseUsers(Long id) {
         // Отримуємо поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
         // Отримуємо ID користувача
-        Integer userId = currentAuthUser.getId();
+        Long userId = currentAuthUser.getId();
         boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
@@ -129,7 +129,7 @@ public class CourseServiceImpl implements CourseServiceI {
         if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         Course course = courses.getFirst();
 
-        List<Integer> courseUsersId = courseDao.getCourseUsersIdByCourseId(id);
+        List<Long> courseUsersId = courseDao.getCourseUsersIdByCourseId(id);
         // Формуємо список користувачів
         List<UserView> users = courseUsersId.stream()
                 // По ID користувача отримуємо інформацію з бази та створюємо список
@@ -142,7 +142,7 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public AddUserToCourseResponse addUserToCourse(int userId, int id) {
+    public AddUserToCourseResponse addUserToCourse(Long userId, Long id) {
         boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
@@ -156,7 +156,7 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public DeleteUserFromCourseResponse deleteUserFromCourse(int userId, int id) {
+    public DeleteUserFromCourseResponse deleteUserFromCourse(Long userId, Long id) {
         boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
         if (!userExistsInCourse)
@@ -170,13 +170,13 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkIfUserExistsInCourse(int id, int userId) {
+    public boolean checkIfUserExistsInCourse(Long id, Long userId) {
         // Отримуємо курс по ID
         List<Course> courses = courseDao.getById(id);
         if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         Course course = courses.getFirst();
         // Отримуємо список ID користувачів по ID курсу
-        List<Integer> courseUsersId = courseDao.getCourseUsersIdByCourseId(course.getId());
+        List<Long> courseUsersId = courseDao.getCourseUsersIdByCourseId(course.getId());
         return courseUsersId.contains(userId);
     }
 
@@ -184,7 +184,7 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public CourseResponse getCourseById(int id) {
+    public CourseResponse getCourseById(Long id) {
         // Отримуємо курс по ID
         Course course = this.courseDao.getById(id).stream()
                 .findFirst()
@@ -197,7 +197,7 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public CourseResponse getCourseWithPassingStatistics(int id) {
+    public CourseResponse getCourseWithPassingStatistics(Long id) {
         User authUser = authUserService.getCurrentAuthUser();
         CourseResponse course = this.getCourseById(id);
         // Заповнюємо обʼєкт

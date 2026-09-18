@@ -1,0 +1,1 @@
+ALTER TABLE auth ADD revoked_at TIMESTAMP;

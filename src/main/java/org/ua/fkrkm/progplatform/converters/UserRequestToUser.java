@@ -59,7 +59,7 @@ public class UserRequestToUser implements Converter<UserRegistrationRequest, Use
      *
      * @return Integer ID знайденої ролі
      */
-    private Integer getRoleId() {
+    private Long getRoleId() {
         List<Role> roles = roleDao.findIdByName(Roles.USER.getRoleName());
         if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
         return roles.getFirst().getId();

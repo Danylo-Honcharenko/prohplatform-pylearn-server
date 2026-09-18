@@ -17,6 +17,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,20 +35,20 @@ public class UserToCurrentUserResponseTest {
     @Test
     public void convertTest() {
         User user = User.builder()
-                .id(1)
+                .id(1L)
                 .first_name("John")
                 .last_name("Smith")
                 .email("test.test@gmail.com")
-                .roleId(1)
+                .roleId(1L)
                 .password("123456789")
                 .created(new Date())
                 .build();
 
 
         TestResult testResult = TestResult.builder()
-                .id(1)
+                .id(1L)
                 .testUuid("dfdsf3324234dasd")
-                .userId(2)
+                .userId(2L)
                 .maxAssessment(100)
                 .assessment(15)
                 .correct("correct")
@@ -55,10 +56,10 @@ public class UserToCurrentUserResponseTest {
                 .created(new Date())
                 .build();
 
-        when(resultDao.getTestResultsByUserId(anyInt()))
+        when(resultDao.getTestResultsByUserId(anyLong()))
                 .thenReturn(List.of(testResult));
 
-        when(roleDao.getById(anyInt()))
+        when(roleDao.getById(anyLong()))
                 .thenReturn(List.of(Role.builder().name("ROLE_USER").build()));
 
         CurrentUserResponse userResponse = currentUserResponseConverter.convert(user);

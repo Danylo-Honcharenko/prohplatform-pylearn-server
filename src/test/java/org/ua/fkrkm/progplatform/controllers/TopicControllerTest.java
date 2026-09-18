@@ -18,11 +18,11 @@ public class TopicControllerTest {
 
     @Test
     public void getAllModuleTopicsTest() {
-        assertNotNull(topicController.getAllModuleTopics(1));
+        assertNotNull(topicController.getAllModuleTopics(1L));
     }
 
     @Test
     public void getTopicByIdTest() {
-        assertNotNull(topicController.getTopicById(1));
+        assertNotNull(topicController.getTopicById(1L));
     }
 }

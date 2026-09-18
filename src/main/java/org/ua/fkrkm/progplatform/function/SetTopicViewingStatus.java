@@ -39,7 +39,7 @@ public class SetTopicViewingStatus implements Consumer<CourseResponse> {
     private void setTopic(ModuleView moduleView, List<TopicView> topicViews) {
         List<TopicView> topics = topicViews.stream()
                 .filter((topic) -> topic.getModuleId().equals(moduleView.getId()))
-                .sorted(Comparator.comparingInt(TopicView::getId))
+                .sorted(Comparator.comparingLong(TopicView::getId))
                 .toList();
         moduleView.setTopics(topics);
     }
@@ -50,10 +50,10 @@ public class SetTopicViewingStatus implements Consumer<CourseResponse> {
      * @param topicId ID теми
      * @return Boolean true/false
      */
-    private Boolean checkIsTopicDone(int topicId) {
+    private Boolean checkIsTopicDone(Long topicId) {
         if (this.moduleStats.isEmpty()) return false;
         for (ModuleStat moduleStat : this.moduleStats) {
-            if (moduleStat.getTopicId() == topicId) return true;
+            if (moduleStat.getTopicId().equals(topicId)) return true;
         }
         return false;
     }

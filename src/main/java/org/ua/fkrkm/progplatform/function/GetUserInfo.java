@@ -12,7 +12,7 @@ import java.util.function.Function;
 /**
  * Отримання інформація по користувачу використовуючи його ID
  */
-public class GetUserInfo implements Function<Integer, UserView> {
+public class GetUserInfo implements Function<Long, UserView> {
 
     // DAO для роботи з користувачами
     private final UserDaoI userDao;
@@ -27,7 +27,7 @@ public class GetUserInfo implements Function<Integer, UserView> {
     }
 
     @Override
-    public UserView apply(Integer id) {
+    public UserView apply(Long id) {
         List<User> users = userDao.getById(id);
         if (users.isEmpty()) throw new ProgPlatformException(ErrorConsts.USER_NOT_FOUND);
         User user = users.getFirst();

@@ -41,7 +41,7 @@ public class UserToUserViewExt implements Converter<User, UserView> {
      * @param id ID ролі
      * @return String ім'я олі
      */
-    private String getRoleNameById(int id) {
+    private String getRoleNameById(Long id) {
         List<Role> roles = roleDao.getById(id);
         if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
         Role role = roles.getFirst();

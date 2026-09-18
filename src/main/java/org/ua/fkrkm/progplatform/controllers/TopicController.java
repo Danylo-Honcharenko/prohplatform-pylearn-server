@@ -41,7 +41,7 @@ public class TopicController {
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/getAllModuleTopics")
-    public Response<GetAllCourseModules> getAllModuleTopics(@Parameter(description = "ID модуля") @RequestParam(name = "moduleId") int moduleId) {
+    public Response<GetAllCourseModules> getAllModuleTopics(@Parameter(description = "ID модуля") @RequestParam(name = "moduleId") Long moduleId) {
         return new Response<>(HttpStatus.OK, topicService.getAllModuleTopics(moduleId));
     }
 
@@ -61,7 +61,7 @@ public class TopicController {
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/get")
-    public Response<TopicResponse> getTopicById(@Parameter(description = "ID теми") @RequestParam(name = "topicId") int topicId) {
+    public Response<TopicResponse> getTopicById(@Parameter(description = "ID теми") @RequestParam(name = "topicId") Long topicId) {
         return new Response<>(HttpStatus.OK, topicService.getTopicById(topicId));
     }
 }

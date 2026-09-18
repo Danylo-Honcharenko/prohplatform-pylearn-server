@@ -2,21 +2,19 @@ package org.ua.fkrkm.progplatform.services.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.ua.fkrkm.progplatform.dto.GeneratedToken;
+import org.ua.fkrkm.progplatform.dto.TokenInfo;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -29,8 +27,12 @@ public class JwtServiceImpl implements JwtServiceI {
     private long jwtExpiration;
 
     @Override
-    public GeneratedToken generateToken(String email) {
-        return this.buildToken(new HashMap<>(), email, jwtExpiration);
+    public TokenInfo generateToken(Long userId, String email, UUID sid) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("sid", sid.toString());
+        claims.put("email", email);
+
+        return this.buildToken(claims, userId, jwtExpiration);
     }
 
     @Override
@@ -42,7 +44,18 @@ public class JwtServiceImpl implements JwtServiceI {
 
     @Override
     public String extractUserName(String token) {
-        return this.extractClaim(token, Claims::getSubject);
+        return this.extractClaim(token, (claims) -> claims.get("email", String.class));
+    }
+
+    @Override
+    public Long extractUserId(String token) {
+        String id = this.extractClaim(token, Claims::getSubject);
+        return Long.valueOf(id);
+    }
+
+    @Override
+    public String extractSid(String token) {
+        return this.extractClaim(token, (claims) -> claims.get("sid", String.class));
     }
 
     @Override
@@ -50,17 +63,19 @@ public class JwtServiceImpl implements JwtServiceI {
         return this.jwtExpiration;
     }
 
-    private GeneratedToken buildToken(Map<String, Object> extraClaims, String email, long expiration) {
+    private TokenInfo buildToken(Map<String, Object> extraClaims, Long userId, long expiration) {
         Date expirationDate = new Date(System.currentTimeMillis() + expiration);
+        Date issuedAt = new Date(System.currentTimeMillis());
+
         String token = Jwts.builder()
+                .subject(userId.toString())
                 .claims(extraClaims)
-                .subject(email)
-                .issuedAt(new Date(System.currentTimeMillis()))
+                .issuedAt(issuedAt)
                 .expiration(expirationDate)
                 .signWith(getSignInKey())
                 .compact();
 
-        return new GeneratedToken(token, expirationDate);
+        return new TokenInfo(token, (String) extraClaims.get("sid"), issuedAt, expirationDate);
     }
 
     private boolean isTokenExpired(String token) {

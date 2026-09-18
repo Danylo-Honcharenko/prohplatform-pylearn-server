@@ -54,7 +54,7 @@ public class CourseServiceTest {
     @Test
     public void createTest() {
         when(this.authUserService.getCurrentAuthUser())
-                .thenReturn(User.builder().id(1).build());
+                .thenReturn(User.builder().id(1L).build());
 
         when(this.courseDao.create(any()))
                 .thenReturn(1);

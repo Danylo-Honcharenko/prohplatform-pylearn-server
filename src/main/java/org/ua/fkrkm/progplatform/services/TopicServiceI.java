@@ -27,19 +27,19 @@ public interface TopicServiceI {
      * @param id ID теми
      * @return DeleteTopicResponse відповідь API
      */
-    DeleteTopicResponse delete(int id);
+    DeleteTopicResponse delete(Long id);
     /**
      * Отримати всі теми модуля
      *
      * @param moduleId ID курсу
      * @return GetAllCourseTopics відповідь API
      */
-    GetAllCourseModules getAllModuleTopics(int moduleId);
+    GetAllCourseModules getAllModuleTopics(Long moduleId);
     /**
      * Отримати тему по ID
      *
      * @param topicId ID теми
      * @return TopicResponse відповідь API
      */
-    TopicResponse getTopicById(int topicId);
+    TopicResponse getTopicById(Long topicId);
 }

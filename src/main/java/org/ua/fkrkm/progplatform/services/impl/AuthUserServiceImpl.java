@@ -8,15 +8,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.UserDaoI;
+import org.ua.fkrkm.progplatform.consts.Roles;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * Сервіс для роботи з поточним користувачем в системі
+ * Сервіс для роботи з поточним користувачем у системі
  */
 @Service
 @RequiredArgsConstructor
@@ -32,11 +34,15 @@ public class AuthUserServiceImpl implements AuthUserServiceI {
     public org.ua.fkrkm.proglatformdao.entity.User getCurrentAuthUser() {
         // Отримуємо поточний стан аутентифікації
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // Перевіряємо, що отримали
+        if (Objects.isNull(authentication)) throw new ProgPlatformException("Not get authentication!");
         // Отримуємо користувача
         User user = (User) authentication.getPrincipal();
+        // Перевіряємо, що отримали користувача
+        if (Objects.isNull(user)) throw new ProgPlatformException("Not get user!");
         // Шукаємо повну інформацію в базі по Email
         List<org.ua.fkrkm.proglatformdao.entity.User> foundUsers = userDao.findByEmail(user.getUsername());
-        // Перевіряємо що користувача знайдено
+        // Перевіряємо, що користувача знайдено
         if (foundUsers.isEmpty()) throw new ProgPlatformException(ErrorConsts.USER_NOT_FOUND);
         return foundUsers.getFirst();
     }
@@ -46,12 +52,8 @@ public class AuthUserServiceImpl implements AuthUserServiceI {
      */
     @Override
     public boolean isCurrentAuthUserAdmin() {
-        // Отримуємо поточний стан аутентифікації
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // Отримуємо користувача
-        User user = (User) authentication.getPrincipal();
-        Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
-        return authorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        Collection<? extends GrantedAuthority> grantedAuthorities = this.getGrantedAuthorities();
+        return grantedAuthorities.contains(new SimpleGrantedAuthority(Roles.ADMIN.getRoleName()));
     }
 
     /**
@@ -59,11 +61,19 @@ public class AuthUserServiceImpl implements AuthUserServiceI {
      */
     @Override
     public boolean isCurrentAuthUserTeacher() {
+        Collection<? extends GrantedAuthority> grantedAuthorities = this.getGrantedAuthorities();
+        return grantedAuthorities.contains(new SimpleGrantedAuthority(Roles.TEACHER.getRoleName()));
+    }
+
+    private Collection<? extends GrantedAuthority> getGrantedAuthorities() {
         // Отримуємо поточний стан аутентифікації
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // Перевіряємо, що отримали
+        if (Objects.isNull(authentication)) throw new ProgPlatformException("Not get authentication!");
         // Отримуємо користувача
         User user = (User) authentication.getPrincipal();
-        Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
-        return authorities.contains(new SimpleGrantedAuthority("ROLE_TEACHER"));
+        // Перевіряємо, що отримали користувача
+        if (Objects.isNull(user)) throw new ProgPlatformException("Not get user!");
+        return user.getAuthorities();
     }
 }

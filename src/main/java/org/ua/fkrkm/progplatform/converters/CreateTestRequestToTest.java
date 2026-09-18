@@ -17,7 +17,7 @@ public class CreateTestRequestToTest implements Converter<CreateTestRequest, Tes
     public Test convert(CreateTestRequest source) {
         return Test.builder()
                 .name(source.getName())
-                .topicId(source.getTopicId())
+                .topicId(source.getTopicId().intValue())
                 .questions(source.getQuestions())
                 .created(simpleDateFormat.format(new Date()))
                 .build();

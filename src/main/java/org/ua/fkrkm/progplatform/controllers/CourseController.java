@@ -54,7 +54,7 @@ public class CourseController {
     })
     @ResponseBody
     @GetMapping("/{id}/getUsers")
-    public Response<CourseUsersResponse> getCourseUsers(@Parameter(description = "ID курсу") @PathVariable int id) {
+    public Response<CourseUsersResponse> getCourseUsers(@Parameter(description = "ID курсу") @PathVariable Long id) {
         return new Response<>(HttpStatus.OK, courseService.getCourseUsers(id));
     }
 
@@ -73,7 +73,7 @@ public class CourseController {
     })
     @ResponseBody
     @GetMapping("/{id}")
-    public Response<CourseResponse> getCourseById(@Parameter(description = "ID курсу") @PathVariable int id) {
+    public Response<CourseResponse> getCourseById(@Parameter(description = "ID курсу") @PathVariable Long id) {
         return new Response<>(HttpStatus.OK, courseService.getCourseById(id));
     }
 
@@ -92,7 +92,7 @@ public class CourseController {
     })
     @ResponseBody
     @GetMapping("/{id}/user/stat")
-    public Response<CourseResponse> getCourseWithPassingStatistics(@Parameter(description = "ID курсу") @PathVariable int id) {
+    public Response<CourseResponse> getCourseWithPassingStatistics(@Parameter(description = "ID курсу") @PathVariable Long id) {
         return new Response<>(HttpStatus.OK, courseService.getCourseWithPassingStatistics(id));
     }
 

@@ -4,15 +4,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Об'ект згенерованого токену
  */
 @Getter
 @AllArgsConstructor
-public class GeneratedToken {
+public class TokenInfo {
     // Токен
     private String token;
-    // Дата закінчення дії токену
+    // ID сессії
+    private String sid;
+    // Дата створення токена
+    private Date created;
+    // Дата закінчення дії токена
     private Date expired;
 }

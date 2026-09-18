@@ -3,6 +3,7 @@ package org.ua.fkrkm.progplatform.configuration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.ua.fkrkm.proglatformdao.dao.*;
 import org.ua.fkrkm.proglatformdao.dao.impl.*;

@@ -17,7 +17,7 @@ public class TestCreateTestResponse implements Converter<Test, CreateTestRespons
         return CreateTestResponse.builder()
                 .uuid(source.getId())
                 .name(source.getName())
-                .topicId(source.getTopicId())
+                .topicId(source.getTopicId().longValue())
                 .questions(questionsToQuestionsView(source.getQuestions()))
                 .created(source.getCreated())
                 .build();

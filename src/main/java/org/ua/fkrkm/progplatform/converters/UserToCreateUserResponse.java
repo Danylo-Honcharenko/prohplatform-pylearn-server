@@ -47,7 +47,7 @@ public class UserToCreateUserResponse implements Converter<User, CreateUserRespo
      * @param roleId ID ролі
      * @return String назва ролі
      */
-    private String getRoleName(int roleId) {
+    private String getRoleName(Long roleId) {
         List<Role> roles = roleDao.getById(roleId);
         if (roles.isEmpty()) {
             log.warn("Не знайдено ролі з ID: {}", roleId);

@@ -62,7 +62,7 @@ public class CourseToCourseResponse implements MultiConverter<Course, CourseResp
     private List<Topic> getTopicsByModules(List<Module> modules) {
         if (modules.isEmpty()) return new ArrayList<>();
 
-        List<Integer> moduleIds = modules.stream()
+        List<Long> moduleIds = modules.stream()
                 .map(Module::getId)
                 .toList();
 
@@ -77,10 +77,10 @@ public class CourseToCourseResponse implements MultiConverter<Course, CourseResp
      */
     private List<CourseResponse> convertList(List<Course> courses) {
 
-        Map<Integer, Course> courseIdToCourse = courses.stream()
+        Map<Long, Course> courseIdToCourse = courses.stream()
                 .collect(Collectors.toMap(Course::getId, (course) -> course));
 
-        Map<Integer, List<Module>> courseIdToModule = courses.stream()
+        Map<Long, List<Module>> courseIdToModule = courses.stream()
                 .flatMap((course) -> this.moduleDao.getModulesByCourseId(course.getId()).stream())
                 .collect(Collectors.groupingBy(Module::getCourseId));
 
@@ -88,7 +88,7 @@ public class CourseToCourseResponse implements MultiConverter<Course, CourseResp
                 .flatMap(Collection::stream)
                 .toList();
 
-        Map<Integer, List<Topic>> moduleIdToTopic = this.getTopicsByModules(modules).stream()
+        Map<Long, List<Topic>> moduleIdToTopic = this.getTopicsByModules(modules).stream()
                 .collect(Collectors.groupingBy(Topic::getModuleId));
 
         return courseIdToModule.keySet().stream()

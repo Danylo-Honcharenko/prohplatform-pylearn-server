@@ -16,7 +16,7 @@ import org.ua.fkrkm.progplatform.services.ModuleServiceI;
 @RequiredArgsConstructor
 public class ModuleServiceImpl implements ModuleServiceI {
 
-    // DAO для роботи зі статистикой по модулях
+    // DAO для роботи зі статистиком по модулях
     private final ModuleStatDaoI moduleStatDao;
     // Конвертор
     private final Converter<SetModuleTopicCompletedRequest, ModuleStat> createModuleCompleteRequestModuleStatConverter;
@@ -29,7 +29,7 @@ public class ModuleServiceImpl implements ModuleServiceI {
     @Override
     public SetModuleTopicCompletedResponse setCompletedModuleTopic(SetModuleTopicCompletedRequest request) {
         ModuleStat moduleStat = createModuleCompleteRequestModuleStatConverter.convert(request);
-        int id = moduleStatDao.create(moduleStat);
+        Long id = (long) moduleStatDao.create(moduleStat);
         moduleStat.setId(id);
         return createModuleCompleteResponseModuleStatConverter.convert(moduleStat);
     }

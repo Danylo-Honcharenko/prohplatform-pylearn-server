@@ -27,7 +27,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
-import org.ua.fkrkm.proglatformdao.entity.Auth;
+import org.ua.fkrkm.proglatformdao.dao.UserDaoI;
 import org.ua.fkrkm.progplatform.exceptions.InvalidJwtAuthenticationException;
 import org.ua.fkrkm.progplatform.exceptions.RevokedJwtAuthenticationException;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
@@ -38,7 +38,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * Фільтр для аутентифікації запиту
@@ -54,8 +54,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     // Назва cookie
     private final String cookiesTokenName;
-    // DAO для роботи з аунтифікованими користувачами
+    // DAO для роботи з аутентифікованими користувачами
     private final AuthDaoI authDao;
+    // DAO для роботи з користувачами
+    private final UserDaoI userDao;
 
     private final ObjectMapper objectMapper;
 
@@ -77,12 +79,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                    UserDetailsService userDetailsService,
                                    @Value("${cookies.jwt.token.name}") String cookiesTokenName,
                                    AuthDaoI authDao,
-                                   ObjectMapper objectMapper) {
+                                   ObjectMapper objectMapper,
+                                   UserDaoI userDao) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.cookiesTokenName = cookiesTokenName;
         this.authDao = authDao;
         this.objectMapper = objectMapper;
+        this.userDao = userDao;
     }
 
     /**
@@ -169,9 +173,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param request запит
      */
     private void authenticateToken(String token, HttpServletRequest request) {
-        String email = jwtService.extractUserName(token);
+        Long userId = this.jwtService.extractUserId(token);
 
-        if (email == null || email.isBlank()) {
+        if (Objects.isNull(userId)) {
             throw new IllegalArgumentException("JWT subject is missing");
         }
 
@@ -179,13 +183,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        UserDetails user = userDetailsService.loadUserByUsername(email);
+        String email = this.jwtService.extractUserName(token);
+        UserDetails user = this.userDetailsService.loadUserByUsername(email);
 
-        if (!jwtService.isTokenValid(token, user)) {
+        if (!this.jwtService.isTokenValid(token, user)) {
             throw new InvalidJwtAuthenticationException("JWT claims are invalid");
         }
 
-        if (!checkAccessTokenInDatabase(token)) {
+        if (this.isJwtRevoked(token)) {
             throw new RevokedJwtAuthenticationException("JWT is revoked");
         }
 
@@ -239,13 +244,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Перевіряємо наявність активного токена в базі
+     * Перевіряємо, що токен не відкликаний
      *
-     * @param accessToken токен
+     * @param token email
      * @return boolean наявність true/false
      */
-    private boolean checkAccessTokenInDatabase(String accessToken) {
-        List<Auth> auth = authDao.getByAccessToken(accessToken);
-        return !auth.isEmpty();
+    private boolean isJwtRevoked(String token) {
+        Long userId = this.jwtService.extractUserId(token);
+        String sid = this.jwtService.extractSid(token);
+
+        return this.authDao.isRevokedByUserId(userId, sid);
     }
 }

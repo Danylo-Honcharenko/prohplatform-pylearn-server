@@ -27,7 +27,7 @@ public interface CourseServiceI {
      * @param id ID курсу
      * @return DeleteCourseResponse відповідь API
      */
-    DeleteCourseResponse delete(int id);
+    DeleteCourseResponse delete(Long id);
     /**
      * Отримати всі курси
      *
@@ -40,7 +40,7 @@ public interface CourseServiceI {
      * @param id ID курсу
      * @return CourseUsersResponse відповідь API
      */
-    CourseUsersResponse getCourseUsers(int id);
+    CourseUsersResponse getCourseUsers(Long id);
     /**
      * Додати користувача до курсу
      *
@@ -48,7 +48,7 @@ public interface CourseServiceI {
      * @param id ID курсу
      * @return AddUserToCourseResponse відповідь API
      */
-    AddUserToCourseResponse addUserToCourse(int userId, int id);
+    AddUserToCourseResponse addUserToCourse(Long userId, Long id);
     /**
      * Видалити користувача з курсу
      *
@@ -56,7 +56,7 @@ public interface CourseServiceI {
      * @param id ID курсу
      * @return DeleteUserFromCourseResponse відповідь API
      */
-    DeleteUserFromCourseResponse deleteUserFromCourse(int userId, int id);
+    DeleteUserFromCourseResponse deleteUserFromCourse(Long userId, Long id);
     /**
      * Перевіряє що користувач присутній в курсе
      *
@@ -64,21 +64,21 @@ public interface CourseServiceI {
      * @param userId ID користувача
      * @return boolean true/false
      */
-    boolean checkIfUserExistsInCourse(int id, int userId);
+    boolean checkIfUserExistsInCourse(Long id, Long userId);
     /**
      * Отримати курс по ID
      *
      * @param id ID курсу
      * @return CourseResponse відповідь API
      */
-    CourseResponse getCourseById(int id);
+    CourseResponse getCourseById(Long id);
     /**
      * Отримати курс зі статистикою проходження користувача
      *
      * @param id ID курсу
      * @return CourseResponse відповідь API
      */
-    CourseResponse getCourseWithPassingStatistics(int id);
+    CourseResponse getCourseWithPassingStatistics(Long id);
     /**
      * Отримати всі курси користувача
      *

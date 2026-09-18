@@ -15,9 +15,9 @@ import java.util.function.Function;
 
 public class SetTest implements Consumer<CourseResponse> {
 
-    private final Function<List<Integer>, List<Test>> function;
+    private final Function<List<Long>, List<Test>> function;
 
-    public SetTest(Function<List<Integer>, List<Test>> function) {
+    public SetTest(Function<List<Long>, List<Test>> function) {
         this.function = function;
     }
 
@@ -34,7 +34,7 @@ public class SetTest implements Consumer<CourseResponse> {
 
     private void getTopic(ModuleView module) {
         List<TopicView> topics = module.getTopics();
-        List<Integer> viewsIds = topics.stream()
+        List<Long> viewsIds = topics.stream()
                 .map(TopicView::getId)
                 .toList();
         List<TestView> tests = function.apply(viewsIds).stream()
@@ -48,12 +48,10 @@ public class SetTest implements Consumer<CourseResponse> {
 
     private void setTest(TopicView topicView, List<TestView> tests) {
         Optional<TestView> testView = tests.stream()
-                .filter((test) -> test.getTopicId().equals(topicView.getId()))
+                .filter((test) -> test.getTopicId().equals(topicView.getId().intValue()))
                 .findFirst();
 
-        if (testView.isPresent()) {
-            topicView.setTests(List.of(testView.get()));
-        }
+        testView.ifPresent(view -> topicView.setTests(List.of(view)));
     }
 
     /**

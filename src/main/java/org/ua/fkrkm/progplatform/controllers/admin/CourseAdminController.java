@@ -86,7 +86,7 @@ public class CourseAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/delete")
-    public Response<DeleteCourseResponse> delete(@Parameter(description = "ID курсу") @RequestParam(name = "id") int id) {
+    public Response<DeleteCourseResponse> delete(@Parameter(description = "ID курсу") @RequestParam(name = "id") Long id) {
         return new Response<>(HttpStatus.OK, courseService.delete(id));
     }
 
@@ -107,8 +107,8 @@ public class CourseAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/addUserToCourse")
-    public Response<AddUserToCourseResponse> addUserToCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") int userId,
-                                                             @Parameter(description = "ID курса") @RequestParam(name = "courseId") int courseId) {
+    public Response<AddUserToCourseResponse> addUserToCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") Long userId,
+                                                             @Parameter(description = "ID курса") @RequestParam(name = "courseId") Long courseId) {
         return new Response<>(HttpStatus.OK, courseService.addUserToCourse(userId, courseId));
     }
 
@@ -129,8 +129,8 @@ public class CourseAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/deleteUserFromCourse")
-    public Response<DeleteUserFromCourseResponse> deleteUserFromCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") int userId,
-                                                                       @Parameter(description = "ID курса") @RequestParam(name = "courseId") int courseId) {
+    public Response<DeleteUserFromCourseResponse> deleteUserFromCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") Long userId,
+                                                                       @Parameter(description = "ID курса") @RequestParam(name = "courseId") Long courseId) {
         return new Response<>(HttpStatus.OK, courseService.deleteUserFromCourse(userId, courseId));
     }
 }

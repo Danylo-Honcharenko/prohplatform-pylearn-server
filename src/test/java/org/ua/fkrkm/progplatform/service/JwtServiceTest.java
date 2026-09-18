@@ -7,6 +7,7 @@ import org.ua.fkrkm.progplatform.services.JwtServiceI;
 import org.ua.fkrkm.progplatform.services.impl.JwtServiceImpl;
 
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.core.userdetails.User.withUsername;
@@ -28,16 +29,22 @@ public class JwtServiceTest {
 
     @Test
     public void generateTokenTest() {
-        String token = jwtService.generateToken("test.test@gmail.com").getToken();
+        String token = jwtService.generateToken(1L, "test.test@gmail.com", UUID.randomUUID()).getToken();
         assertNotNull(token);
     }
 
     @Test
     public void extractTest() {
         String userEmail = "test.test@gmail.com";
-        String token = jwtService.generateToken(userEmail).getToken();
+        UUID sid = UUID.randomUUID();
+        String token = jwtService.generateToken(1L, "test.test@gmail.com", sid).getToken();
         String userName = jwtService.extractUserName(token);
+        Long userId = jwtService.extractUserId(token);
+        String sidFromToken = jwtService.extractSid(token);
+
         assertEquals(userEmail, userName);
+        assertEquals(1L, userId);
+        assertEquals(sid.toString(), sidFromToken);
     }
 
     @Test
@@ -45,7 +52,7 @@ public class JwtServiceTest {
         String userEmail = "test.test@gmail.com";
         User.UserBuilder buildUser = withUsername(userEmail);
         buildUser.password("12345678");
-        String token = jwtService.generateToken(userEmail).getToken();
+        String token = jwtService.generateToken(1L, "test.test@gmail.com", UUID.randomUUID()).getToken();
 
         assertTrue(jwtService.isTokenValid(token, buildUser.build()));
     }

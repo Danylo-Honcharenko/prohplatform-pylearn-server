@@ -154,7 +154,6 @@ public class UserController {
     /**
      * Отримати користувача по заданим параметрам
      *
-     * @param id ID користувача
      * @return Response<CurrentUserResponse> відповідь API
      */
     @Operation(
@@ -167,11 +166,10 @@ public class UserController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/auth/getUser")
-    public Response<UserResponse> getUserByParams(@Parameter(description = "ID") @RequestParam(name = "id", required = false) Integer id,
-                                                  @Parameter(description = "Ім'я") @RequestParam(name = "firstName", required = false) String firstName,
+    public Response<UserResponse> getUserByParams(@Parameter(description = "Ім'я") @RequestParam(name = "firstName", required = false) String firstName,
                                                   @Parameter(description = "Фамілія") @RequestParam(name = "lastName", required = false) String lastName,
                                                   @Parameter(description = "Email") @RequestParam(name = "email", required = false) String email) {
-        return new Response<>(HttpStatus.OK, userService.getUserByParams(id, firstName, lastName, email));
+        return new Response<>(HttpStatus.OK, userService.getUserByParams(firstName, lastName, email));
     }
 
     /**
@@ -190,7 +188,7 @@ public class UserController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/auth/delete")
-    public Response<DeleteUserResponse> delete(@Parameter(description = "ID користувача") @RequestParam(name = "id") int id) {
+    public Response<DeleteUserResponse> delete(@Parameter(description = "ID користувача") @RequestParam(name = "id") Long id) {
         return new Response<>(HttpStatus.OK, userService.delete(id));
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
@@ -21,7 +22,6 @@ import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformExceptionBadRequest;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
-import org.ua.fkrkm.progplatform.function.RemoveToken;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 import org.ua.fkrkm.progplatform.services.UserServiceI;
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserServiceI {
     private final Converter<User, CurrentUserResponse> currentUserResponseConverter;
     // Конвертор
     private final Converter<User, UserView> userViewExtConverter;
-    // DAO для роботи з аунтифікованими користувачами
+    // DAO для роботи з аутентифікованими користувачами
     private final AuthDaoI authDao;
     // Ім'я кукі з JWT токеном
     @Value("${cookies.jwt.token.name}")
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserServiceI {
     @Override
     public CreateUserResponse registration(UserRegistrationRequest request) {
         User user = createUserRequestConverter.convert(request);
-        int id = userDao.create(user);
+        Long id = (long) userDao.create(user);
         user.setId(id);
         return createUserResponseConverter.convert(user);
     }
@@ -90,8 +90,6 @@ public class UserServiceImpl implements UserServiceI {
         // Перевіряємо, що він існує
         if (user.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         return AuthChain.init(request)
-                // Видаляємо старі Jwt токени користувача з бази якщо вони є
-                .take(new RemoveToken(this.authDao, user.getFirst()))
                 // Перевіряємо хеш пароля
                 .check(new ValidatePasswordHash(this.passwordEncoder, user.getFirst()))
                 // Генеруємо Jwt токен і готуємо відповідь для клієнта
@@ -114,6 +112,16 @@ public class UserServiceImpl implements UserServiceI {
         // Перевіряємо, що потрібний cookie встановлено
         if (isCookiePresent) {
 
+            Cookie cookie = optionalCookie.get();
+            String token = cookie.getValue();
+
+            Long id = this.jwtService.extractUserId(token);
+            String sid = this.jwtService.extractSid(token);
+
+            this.authDao.revokeByUserId(id, sid);
+
+            SecurityContextHolder.clearContext();
+
             ResponseCookie deleteCookie = ResponseCookie
                     .from(cookiesTokenName, "")
                     .httpOnly(true)
@@ -124,12 +132,6 @@ public class UserServiceImpl implements UserServiceI {
                     .build();
 
             response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-
-            Cookie cookie = optionalCookie.get();
-            String token = cookie.getValue();
-
-            // Видаляємо токен з бази
-            authDao.deleteByAccessToken(token);
         }
         return new LogoutResponse(isCookiePresent ? "LOGOUT" : "CANNOT LOGOUT!");
     }
@@ -186,9 +188,9 @@ public class UserServiceImpl implements UserServiceI {
      * {@inheritDoc}
      */
     @Override
-    public UserResponse getUserByParams(Integer id, String firstName, String lastName, String email) {
+    public UserResponse getUserByParams(String firstName, String lastName, String email) {
         // Отримуємо користувача по параметрам
-        List<User> users = userDao.findByParams(id, firstName, lastName, email);
+        List<User> users = userDao.findByParams(firstName, lastName, email);
         // Перевіряємо, що користувач існує
         if (users.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.USER_NOT_FOUND);
         User user = users.getFirst();
@@ -202,7 +204,7 @@ public class UserServiceImpl implements UserServiceI {
      * {@inheritDoc}
      */
     @Override
-    public DeleteUserResponse delete(int id) {
+    public DeleteUserResponse delete(Long id) {
         // Отримуємо розширену сутність поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
         // Отримуємо користувача по ID
@@ -241,7 +243,7 @@ public class UserServiceImpl implements UserServiceI {
         List<Role> roles = roleDao.findIdByName(request.getRoleName());
         // Перевіряємо, що роль існує
         if (roles.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.ROLE_NOT_FOUND);
-        Integer roleId = roles.getFirst().getId();
+        Long roleId = roles.getFirst().getId();
         List<Role> newRoles = roleDao.getById(roleId);
         List<Role> oldRoles = roleDao.getById(user.getRoleId());
         if (newRoles.isEmpty() || oldRoles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);

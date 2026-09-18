@@ -52,7 +52,7 @@ public class TopicServiceImpl implements TopicServiceI {
     public CreateTopicResponse create(CreateTopicRequest request) {
         Topic topic = createTopicRequestTopicConverter.convert(request);
         // Створюємо тему
-        int id = topicDao.create(topic);
+        Long id = (long) topicDao.create(topic);
         topic.setId(id);
         return createTopicResponseTopicConverter.convert(topic);
     }
@@ -65,8 +65,8 @@ public class TopicServiceImpl implements TopicServiceI {
         // Отримуємо поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
         // Отримуємо ID користувача
-        Integer userId = currentAuthUser.getId();
-        Integer courseId = request.getCourseId();
+        Long userId = currentAuthUser.getId();
+        Long courseId = request.getCourseId();
         if (courseId != null) {
             boolean userExistsInCourse = courseService.checkIfUserExistsInCourse(courseId, userId);
             // Перевіряємо, що поточний користувач є в цьому списку
@@ -78,7 +78,7 @@ public class TopicServiceImpl implements TopicServiceI {
         if (topics.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.TOPIC_NOT_FOUND);
         Topic topic = topics.getFirst();
 
-        // Заповнюємо оновлені дані якщо вони є
+        // Заповнюємо оновлені дані, якщо вони є
         Optional.ofNullable(request.getName()).filter(s -> !s.isBlank()).ifPresent(topic::setName);
         Optional.ofNullable(request.getDescription()).filter(s -> !s.isBlank()).ifPresent(topic::setDescription);
         Optional.ofNullable(request.getCourseId()).ifPresent(topic::setModuleId);
@@ -93,7 +93,7 @@ public class TopicServiceImpl implements TopicServiceI {
      * {@inheritDoc}
      */
     @Override
-    public DeleteTopicResponse delete(int id) {
+    public DeleteTopicResponse delete(Long id) {
         topicDao.delete(id);
         return new DeleteTopicResponse(id);
     }
@@ -102,7 +102,7 @@ public class TopicServiceImpl implements TopicServiceI {
      * {@inheritDoc}
      */
     @Override
-    public GetAllCourseModules getAllModuleTopics(int moduleId) {
+    public GetAllCourseModules getAllModuleTopics(Long moduleId) {
         List<Module> modules = moduleDao.getById(moduleId);
         if (modules.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.MODULE_NOT_FOUND);
         List<Topic> courseTopics = topicDao.findAllTopicsByModuleId(moduleId);
@@ -113,7 +113,7 @@ public class TopicServiceImpl implements TopicServiceI {
      * {@inheritDoc}
      */
     @Override
-    public TopicResponse getTopicById(int topicId) {
+    public TopicResponse getTopicById(Long topicId) {
         // Отримуємо тему по ID
         List<Topic> topics = topicDao.getById(topicId);
         if (topics.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.TOPIC_NOT_FOUND);

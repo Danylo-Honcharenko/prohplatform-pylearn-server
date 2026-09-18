@@ -75,7 +75,7 @@ public class SetTopic implements Consumer<CourseResponse> {
         List<TopicView> topics = topicViews.stream()
                 .filter((topic) -> topic.getModuleId().equals(moduleView.getId()))
                 // Сортує по ID
-                .sorted(Comparator.comparingInt(TopicView::getId))
+                .sorted(Comparator.comparingLong(TopicView::getId))
                 .peek((topicView) -> topicView.setPage(sequence.incrementAndGet()))
                 .toList();
         moduleView.setTopics(topics);

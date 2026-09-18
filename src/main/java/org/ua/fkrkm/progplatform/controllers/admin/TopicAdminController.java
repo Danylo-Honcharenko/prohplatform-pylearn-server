@@ -88,7 +88,7 @@ public class TopicAdminController {
     @SecurityRequirement(name = "Bearer Authentication")
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/delete")
-    public Response<DeleteTopicResponse> delete(@Parameter(description = "ID теми") @RequestParam(name = "id") int id) {
+    public Response<DeleteTopicResponse> delete(@Parameter(description = "ID теми") @RequestParam(name = "id") Long id) {
         return new Response<>(HttpStatus.OK, topicService.delete(id));
     }
 }

@@ -48,11 +48,11 @@ public class UserControllerTest {
 
     @Test
     public void getUserByParamsTest() {
-        assertNotNull(userController.getUserByParams(1, "firstName", "lastName", "email"));
+        assertNotNull(userController.getUserByParams("firstName", "lastName", "email"));
     }
 
     @Test
     public void deleteTest() {
-        assertNotNull(userController.delete(1));
+        assertNotNull(userController.delete(1L));
     }
 }

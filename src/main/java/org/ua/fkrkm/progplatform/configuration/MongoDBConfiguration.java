@@ -20,7 +20,7 @@ public class MongoDBConfiguration {
     /**
      * Отримати підключення до MongoDB
      *
-     * @return
+     * @return MongoDatabaseFactory фабрика для підключення до MongoDB
      */
     @Bean("mongoConnectFactory")
     public MongoDatabaseFactory getMongoDbFactory() {

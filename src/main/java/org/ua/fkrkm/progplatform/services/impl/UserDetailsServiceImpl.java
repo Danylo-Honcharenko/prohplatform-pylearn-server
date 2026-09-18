@@ -1,6 +1,7 @@
 package org.ua.fkrkm.progplatform.services.impl;
 
 import lombok.AllArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,12 +27,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final RoleDaoI roleDao;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
         // Отримуємо користувача
-        List<User> users = userDao.findByEmail(username);
-        // Перевіряємо що користувач присутній
-        if (users.isEmpty()) throw new UsernameNotFoundException("User not found!");
-        User user = users.getFirst();
+        User user = this.userDao.findByEmail(username).stream()
+                .findFirst()
+                .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
         // Намагаємось знайти роль
         List<Role> roles = roleDao.getById(user.getRoleId());
         if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);

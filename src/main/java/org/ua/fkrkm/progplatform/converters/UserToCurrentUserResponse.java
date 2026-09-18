@@ -45,7 +45,7 @@ public class UserToCurrentUserResponse implements Converter<User, CurrentUserRes
      * @param id ID ролі
      * @return String ім'я ролі
      */
-    private String getRoleNameById(int id) {
+    private String getRoleNameById(Long id) {
         List<Role> roles = roleDao.getById(id);
         if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
         Role role = roles.getFirst();
@@ -58,7 +58,7 @@ public class UserToCurrentUserResponse implements Converter<User, CurrentUserRes
      * @param userId ID користувача
      * @return int рівень
      */
-    private int getLevelFromAllTestResultsByUserId(int userId) {
+    private int getLevelFromAllTestResultsByUserId(Long userId) {
         return resultDao.getTestResultsByUserId(userId)
                 .stream()
                 .map(TestResult::getAssessment)
