@@ -34,7 +34,7 @@ public interface TopicServiceI {
      * @param moduleId ID курсу
      * @return GetAllCourseTopics відповідь API
      */
-    GetAllCourseModules getAllModuleTopics(Long moduleId);
+    GetAllModuleTopics getAllModuleTopics(Long moduleId);
     /**
      * Отримати тему по ID
      *

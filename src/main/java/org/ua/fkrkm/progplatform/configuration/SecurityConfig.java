@@ -36,7 +36,7 @@ public class SecurityConfig {
             "/api/user/login",
             "/api/course/getAll",
             "/api/course/getCourseUsers",
-            "/api/topic/**",
+            "/api/topic/get",
             "/api/user/updatePassword"
     };
 

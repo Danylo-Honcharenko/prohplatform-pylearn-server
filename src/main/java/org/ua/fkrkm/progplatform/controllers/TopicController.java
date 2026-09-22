@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,13 +36,14 @@ public class TopicController {
             summary = "Отримати всі теми модуля"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = GetAllCourseModules.class))}),
+            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = GetAllModuleTopics.class))}),
             @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
     })
     @ResponseBody
+    @SecurityRequirement(name = "Bearer Authentication")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/getAllModuleTopics")
-    public Response<GetAllCourseModules> getAllModuleTopics(@Parameter(description = "ID модуля") @RequestParam(name = "moduleId") Long moduleId) {
+    public Response<GetAllModuleTopics> getAllModuleTopics(@Parameter(description = "ID модуля") @RequestParam(name = "moduleId") Long moduleId) {
         return new Response<>(HttpStatus.OK, topicService.getAllModuleTopics(moduleId));
     }
 

@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.ModuleDaoI;
+import org.ua.fkrkm.proglatformdao.dao.ModuleStatDaoI;
 import org.ua.fkrkm.proglatformdao.dao.TopicDaoI;
 import org.ua.fkrkm.proglatformdao.entity.Module;
+import org.ua.fkrkm.proglatformdao.entity.ModuleStat;
 import org.ua.fkrkm.proglatformdao.entity.Topic;
 import org.ua.fkrkm.proglatformdao.entity.User;
+import org.ua.fkrkm.proglatformdao.entity.view.TopicView;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
@@ -20,6 +23,8 @@ import org.ua.fkrkm.progplatform.services.TopicServiceI;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 /**
  * Сервіс для роботи з темами
@@ -30,6 +35,8 @@ public class TopicServiceImpl implements TopicServiceI {
 
     // DAO для роботи з модулями
     private final ModuleDaoI moduleDao;
+    // DAO для роботи зі статистикой по модулю
+    private final ModuleStatDaoI moduleStatDao;
     // Сервіс для роботи з курсами
     private final CourseServiceI courseService;
     // DAO для роботи з темами
@@ -44,6 +51,8 @@ public class TopicServiceImpl implements TopicServiceI {
     private final Converter<Topic, UpdateTopicResponse> topicToUpdateTopicResponseConverter;
     // Конвертор
     private final Converter<Topic, TopicResponse> topicResponseTopicConverter;
+    // Конвертор
+    private final Converter<Topic, TopicView> topicTopicViewConverter;
 
     /**
      * {@inheritDoc}
@@ -102,11 +111,39 @@ public class TopicServiceImpl implements TopicServiceI {
      * {@inheritDoc}
      */
     @Override
-    public GetAllCourseModules getAllModuleTopics(Long moduleId) {
-        List<Module> modules = moduleDao.getById(moduleId);
+    public GetAllModuleTopics getAllModuleTopics(Long moduleId) {
+        List<Module> modules = this.moduleDao.getById(moduleId);
         if (modules.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.MODULE_NOT_FOUND);
-        List<Topic> courseTopics = topicDao.findAllTopicsByModuleId(moduleId);
-        return new GetAllCourseModules(courseTopics);
+
+        User authUser = authUserService.getCurrentAuthUser();
+        List<ModuleStat> moduleStats = this.moduleStatDao.findModuleStatByUserId(authUser.getId());
+
+        AtomicInteger sequence = new AtomicInteger(0);
+        List<TopicView> topics = this.topicDao.findAllTopicsByModuleId(moduleId).stream()
+                .map(this.topicTopicViewConverter::convert)
+                .peek((topicView) -> topicView.setPage(sequence.incrementAndGet()))
+                .peek((topicView) -> topicView.setDone(this.checkIsTopicDone(topicView.getId(), moduleStats)))
+                .toList();
+
+        List<Integer> pages = IntStream.range(1, sequence.get() + 1)
+                .boxed()
+                .toList();
+
+        return new GetAllModuleTopics(topics, pages);
+    }
+
+    /**
+     * Перевіряємо статус перегляду теми true - переглянута/пройдена, false - не переглянуто
+     *
+     * @param topicId ID теми
+     * @return Boolean true/false
+     */
+    private Boolean checkIsTopicDone(Long topicId, List<ModuleStat> moduleStats) {
+        if (moduleStats.isEmpty()) return false;
+        for (ModuleStat moduleStat : moduleStats) {
+            if (moduleStat.getTopicId().equals(topicId)) return true;
+        }
+        return false;
     }
 
     /**
