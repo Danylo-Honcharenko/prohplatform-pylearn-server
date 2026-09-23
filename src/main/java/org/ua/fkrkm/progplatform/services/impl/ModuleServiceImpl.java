@@ -2,6 +2,7 @@ package org.ua.fkrkm.progplatform.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.ModuleDaoI;
 import org.ua.fkrkm.proglatformdao.dao.ModuleStatDaoI;
@@ -10,6 +11,7 @@ import org.ua.fkrkm.proglatformdao.entity.ModuleStat;
 import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleStateView;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleView;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
@@ -76,8 +78,12 @@ public class ModuleServiceImpl implements ModuleServiceI {
     @Override
     public SetModuleTopicCompletedResponse setCompletedModuleTopic(SetModuleTopicCompletedRequest request) {
         ModuleStat moduleStat = this.createModuleCompleteRequestModuleStatConverter.convert(request);
-        Long id = (long) this.moduleStatDao.create(moduleStat);
-        moduleStat.setId(id);
-        return this.createModuleCompleteResponseModuleStatConverter.convert(moduleStat);
+        try {
+            Long id = (long) this.moduleStatDao.create(moduleStat);
+            moduleStat.setId(id);
+            return this.createModuleCompleteResponseModuleStatConverter.convert(moduleStat);
+        } catch (DuplicateKeyException duplicateKeyException) {
+            throw new ProgPlatformException("Тема вже відмічена як переглянута!");
+        }
     }
 }
