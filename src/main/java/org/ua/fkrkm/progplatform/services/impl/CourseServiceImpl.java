@@ -37,8 +37,6 @@ public class CourseServiceImpl implements CourseServiceI {
     private final Converter<Course, CreateCourseResponse> createCourseResponseCourseConverter;
     // Сервіс для роботи з поточним користувачем в системі
     private final AuthUserServiceI authUserService;
-    // DAO для роботи зі статистикой по модулю
-    private final ModuleStatDaoI moduleStatDao;
     // Конвертор
     private final MultiConverter<Course, CourseResponse> courseToCourseResponseConverter;
 
@@ -197,27 +195,10 @@ public class CourseServiceImpl implements CourseServiceI {
      * {@inheritDoc}
      */
     @Override
-    public CourseResponse getCourseWithPassingStatistics(Long id) {
-        User authUser = authUserService.getCurrentAuthUser();
-        CourseResponse course = this.getCourseById(id);
-        // Заповнюємо обʼєкт
-        return ObjectModifier.init(course)
-                // Встановлює статус перегляду теми
-                .apply(new SetTopicViewingStatus(() -> this.moduleStatDao.findModuleStatByUserId(authUser.getId())))
-                // Встановлюємо процент проходження модулів
-                .apply(new SetModulePercent(() -> this.moduleStatDao.findModulesStatByUserId(authUser.getId())))
-                // Отримуємо объект
-                .get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public UserCourseResponse getUserCourses() {
-        User authUser = authUserService.getCurrentAuthUser();
+        User authUser = this.authUserService.getCurrentAuthUser();
         // Отримуємо всі курси користувача
-        List<Course> courses = courseDao.getCoursesIdByUserId(authUser.getId());
+        List<Course> courses = this.courseDao.getCoursesIdByUserId(authUser.getId());
 
         List<CourseResponse> courseResponses = this.courseToCourseResponseConverter.convert(courses);
 

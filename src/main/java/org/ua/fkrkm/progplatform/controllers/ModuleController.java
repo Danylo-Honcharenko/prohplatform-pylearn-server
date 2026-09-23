@@ -1,6 +1,7 @@
 package org.ua.fkrkm.progplatform.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,7 +23,28 @@ import org.ua.fkrkm.progplatform.services.ModuleServiceI;
 @RequiredArgsConstructor
 public class ModuleController {
 
+    // Сервіс для роботи з модулями
     private final ModuleServiceI moduleService;
+
+    /**
+     * Отримати модулі по ID курсу
+     *
+     * @param courseId ID курсу
+     * @return Response<ModulesResponse> відповідь API
+     */
+    @Operation(
+            summary = "Отримати модулі по ID курсу"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ModulesResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+    })
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/get")
+    public Response<ModulesResponse> getModulesByCourseId(@Parameter(description = "ID курсу") @RequestParam(name = "courseId") Long courseId) {
+        return new Response<>(HttpStatus.OK, this.moduleService.getModulesByCourseId(courseId));
+    }
 
     /**
      * Встановити пройдену тему модуля

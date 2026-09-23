@@ -73,13 +73,6 @@ public interface CourseServiceI {
      */
     CourseResponse getCourseById(Long id);
     /**
-     * Отримати курс зі статистикою проходження користувача
-     *
-     * @param id ID курсу
-     * @return CourseResponse відповідь API
-     */
-    CourseResponse getCourseWithPassingStatistics(Long id);
-    /**
      * Отримати всі курси користувача
      *
      * @return UserCourseResponse відповідь API

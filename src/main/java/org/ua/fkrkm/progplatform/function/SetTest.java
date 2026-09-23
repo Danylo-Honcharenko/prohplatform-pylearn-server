@@ -23,27 +23,27 @@ public class SetTest implements Consumer<CourseResponse> {
 
     @Override
     public void accept(CourseResponse courseResponse) {
-        List<ModuleView> modules = courseResponse.getModules();
-        if (!modules.isEmpty()) {
-            List<ModuleView> moduleViews = modules.stream()
-                    .peek(this::getTopic)
-                    .toList();
-            courseResponse.setModules(moduleViews);
-        }
+//        List<ModuleView> modules = courseResponse.getModules();
+//        if (!modules.isEmpty()) {
+//            List<ModuleView> moduleViews = modules.stream()
+//                    .peek(this::getTopic)
+//                    .toList();
+//            courseResponse.setModules(moduleViews);
+//        }
     }
 
     private void getTopic(ModuleView module) {
-        List<TopicView> topics = module.getTopics();
-        List<Long> viewsIds = topics.stream()
-                .map(TopicView::getId)
-                .toList();
-        List<TestView> tests = function.apply(viewsIds).stream()
-                .map(this::testToTestView)
-                .toList();
-        List<TopicView> topicViews = topics.stream()
-                .peek((topic) -> this.setTest(topic, tests))
-                .toList();
-        module.setTopics(topicViews);
+//        List<TopicView> topics = module.getTopics();
+//        List<Long> viewsIds = topics.stream()
+//                .map(TopicView::getId)
+//                .toList();
+//        List<TestView> tests = function.apply(viewsIds).stream()
+//                .map(this::testToTestView)
+//                .toList();
+//        List<TopicView> topicViews = topics.stream()
+//                .peek((topic) -> this.setTest(topic, tests))
+//                .toList();
+//        module.setTopics(topicViews);
     }
 
     private void setTest(TopicView topicView, List<TestView> tests) {

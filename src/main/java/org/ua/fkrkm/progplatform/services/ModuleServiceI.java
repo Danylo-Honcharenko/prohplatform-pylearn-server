@@ -8,6 +8,13 @@ import org.ua.fkrkm.progplatformclientlib.response.*;
  */
 public interface ModuleServiceI {
     /**
+     * Отримати модулі по ID курсу
+     *
+     * @param courseId ID курсу
+     * @return ModulesResponse відповідь API
+     */
+    ModulesResponse getModulesByCourseId(Long courseId);
+    /**
      * Встановити пройдену тему модуля
      *
      * @param request запит

@@ -34,9 +34,8 @@ public class CourseServiceTest {
     private final AuthUserServiceI authUserService = mock(AuthUserServiceImpl.class);
     private final ModuleDaoI moduleDao = mock(ModuleDaoImpl.class);
     private final TopicDaoI topicDao = mock(TopicDaoImpl.class);
-    private final ModuleStatDaoI moduleStatDao = mock(ModuleStatImpl.class);
 //    private final TestDaoI testDao = mock(TestDaoImpl.class);
-    private final MultiConverter<Course, CourseResponse> courseToCourseResponseConverter = new CourseToCourseResponse(moduleDao, topicDao);
+    private final MultiConverter<Course, CourseResponse> courseToCourseResponseConverter = new CourseToCourseResponse();
 
     @BeforeEach
     public void setUp() {
@@ -46,7 +45,6 @@ public class CourseServiceTest {
                 createCourseRequestCourseConverter,
                 createCourseResponseCourseConverter,
                 authUserService,
-                moduleStatDao,
                 courseToCourseResponseConverter
         );
     }

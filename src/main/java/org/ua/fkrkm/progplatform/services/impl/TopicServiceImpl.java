@@ -20,6 +20,7 @@ import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.CourseServiceI;
 import org.ua.fkrkm.progplatform.services.TopicServiceI;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -121,15 +122,12 @@ public class TopicServiceImpl implements TopicServiceI {
         AtomicInteger sequence = new AtomicInteger(0);
         List<TopicView> topics = this.topicDao.findAllTopicsByModuleId(moduleId).stream()
                 .map(this.topicTopicViewConverter::convert)
+                .sorted(Comparator.comparingLong(TopicView::getId))
                 .peek((topicView) -> topicView.setPage(sequence.incrementAndGet()))
                 .peek((topicView) -> topicView.setDone(this.checkIsTopicDone(topicView.getId(), moduleStats)))
                 .toList();
 
-        List<Integer> pages = IntStream.range(1, sequence.get() + 1)
-                .boxed()
-                .toList();
-
-        return new GetAllModuleTopics(topics, pages);
+        return new GetAllModuleTopics(topics);
     }
 
     /**

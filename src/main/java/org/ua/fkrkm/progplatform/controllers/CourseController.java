@@ -78,25 +78,6 @@ public class CourseController {
     }
 
     /**
-     * Отримати курс по ID зі статистикою проходження
-     *
-     * @param id ID курсу
-     * @return Response<CourseResponse> відповідь API
-     */
-    @Operation(
-            summary = "Отримати курс по ID зі статистикою проходження"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CourseResponse.class))}),
-            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
-    })
-    @ResponseBody
-    @GetMapping("/{id}/user/stat")
-    public Response<CourseResponse> getCourseWithPassingStatistics(@Parameter(description = "ID курсу") @PathVariable Long id) {
-        return new Response<>(HttpStatus.OK, courseService.getCourseWithPassingStatistics(id));
-    }
-
-    /**
      * Отримати курси користувача
      *
      * @return Response<UserCourseResponse> відповідь API
