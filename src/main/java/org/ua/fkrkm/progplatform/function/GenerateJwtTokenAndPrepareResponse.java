@@ -75,6 +75,7 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
                 .lastName(user.getLast_name())
                 .role(this.getRoleNameById(user.getRoleId()))
                 .created(user.getCreated())
+                .tokenExpirationDate(tokenInfo.getExpired())
                 .build();
     }
 
