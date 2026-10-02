@@ -1,6 +1,7 @@
 package org.ua.fkrkm.progplatform.function;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.ua.fkrkm.proglatformdao.dao.AuthDaoI;
@@ -14,6 +15,7 @@ import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 
+import java.util.Date;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -133,6 +135,7 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
                 .sid(UUID.fromString(tokenInfo.getSid()))
                 .created(tokenInfo.getCreated())
                 .expiresAt(tokenInfo.getExpired())
+                .deleteAt(DateUtils.addDays(tokenInfo.getExpired(), 1))
                 .build();
         this.authDao.create(auth);
     }
