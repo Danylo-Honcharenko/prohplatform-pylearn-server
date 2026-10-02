@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.services;
 
+import org.ua.fkrkm.proglatformdao.entity.Course;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 
@@ -78,4 +79,11 @@ public interface CourseServiceI {
      * @return UserCourseResponse відповідь API
      */
     UserCourseResponse getUserCourses();
+    /**
+     * Знайти курс
+     *
+     * @param id ID курсу
+     * @return Course курс
+     */
+    Course findCourseOrThrow(Long id);
 }

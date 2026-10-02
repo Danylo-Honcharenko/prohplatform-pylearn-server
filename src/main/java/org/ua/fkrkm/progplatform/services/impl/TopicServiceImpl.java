@@ -6,16 +6,14 @@ import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.ModuleDaoI;
 import org.ua.fkrkm.proglatformdao.dao.ModuleStatDaoI;
 import org.ua.fkrkm.proglatformdao.dao.TopicDaoI;
+import org.ua.fkrkm.proglatformdao.entity.*;
 import org.ua.fkrkm.proglatformdao.entity.Module;
-import org.ua.fkrkm.proglatformdao.entity.ModuleStat;
-import org.ua.fkrkm.proglatformdao.entity.Topic;
-import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.TopicView;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformAccessDeniedException;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
-import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.CourseServiceI;
 import org.ua.fkrkm.progplatform.services.TopicServiceI;
@@ -25,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 /**
  * Сервіс для роботи з темами
@@ -77,11 +74,12 @@ public class TopicServiceImpl implements TopicServiceI {
         // Отримуємо ID користувача
         Long userId = currentAuthUser.getId();
         Long courseId = request.getCourseId();
+        // TODO: доделать обновление, нужен поиск курса
         if (courseId != null) {
             boolean userExistsInCourse = courseService.checkIfUserExistsInCourse(courseId, userId);
             // Перевіряємо, що поточний користувач є в цьому списку
             if (userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
-                throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
+                throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
         }
         // Отримуємо тему по ID
         List<Topic> topics = topicDao.getById(request.getId());
@@ -113,14 +111,21 @@ public class TopicServiceImpl implements TopicServiceI {
      */
     @Override
     public GetAllModuleTopics getAllModuleTopics(Long moduleId) {
-        List<Module> modules = this.moduleDao.getById(moduleId);
-        if (modules.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.MODULE_NOT_FOUND);
-
         User authUser = authUserService.getCurrentAuthUser();
+
+        Module module = this.moduleDao.getById(moduleId).stream()
+                .findFirst()
+                .orElseThrow(() -> new ProgPlatformNotFoundException(ErrorConsts.MODULE_NOT_FOUND));
+
+        Course course = this.courseService.findCourseOrThrow(module.getCourseId());
+
+        if (!this.courseService.checkIfUserExistsInCourse(course.getId(), authUser.getId()))
+            throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
+
         List<ModuleStat> moduleStats = this.moduleStatDao.findModuleStatByUserId(authUser.getId());
 
         AtomicInteger sequence = new AtomicInteger(0);
-        List<TopicView> topics = this.topicDao.findAllTopicsByModuleId(moduleId).stream()
+        List<TopicView> topics = this.topicDao.findAllTopicsByModuleId(module.getId()).stream()
                 .map(this.topicTopicViewConverter::convert)
                 .sorted(Comparator.comparingLong(TopicView::getId))
                 .peek((topicView) -> topicView.setPage(sequence.incrementAndGet()))

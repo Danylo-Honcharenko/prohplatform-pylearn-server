@@ -9,13 +9,12 @@ import org.ua.fkrkm.proglatformdao.entity.Course;
 import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.UserView;
 import org.ua.fkrkm.progplatform.converters.MultiConverter;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformAccessDeniedException;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.function.*;
-import org.ua.fkrkm.progplatform.utils.ObjectModifier;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
-import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.CourseServiceI;
 
@@ -64,17 +63,13 @@ public class CourseServiceImpl implements CourseServiceI {
     public UpdateCourseResponse update(UpdateCourseRequest request) {
         // Отримуємо поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
+        Course course = this.findCourseOrThrow(request.getId());
         // Отримуємо ID користувача
         Long userId = currentAuthUser.getId();
-        boolean userExistsInCourse = checkIfUserExistsInCourse(request.getId(), userId);
         // Перевіряємо, що поточний користувач є в списку користувачів курсу
-        if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
-            throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
-        // Отримуємо курс по ID
-        List<Course> courses = courseDao.getById(request.getId());
-        if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
-        Course course = courses.getFirst();
-
+        if (!this.checkIfUserExistsInCourse(request.getId(), userId)
+                && !authUserService.isCurrentAuthUserAdmin())
+            throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Заповнюємо оновлені дані, якщо вони є
         Optional.ofNullable(request.getName()).filter(s -> !s.isBlank()).ifPresent(course::setName);
         Optional.ofNullable(request.getDescription()).filter(s -> !s.isBlank()).ifPresent(course::setDescription);
@@ -115,17 +110,13 @@ public class CourseServiceImpl implements CourseServiceI {
     public CourseUsersResponse getCourseUsers(Long id) {
         // Отримуємо поточного користувача в системі
         User currentAuthUser = authUserService.getCurrentAuthUser();
+        Course course = this.findCourseOrThrow(id);
         // Отримуємо ID користувача
         Long userId = currentAuthUser.getId();
-        boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
         // Перевіряємо, що поточний користувач є в цьому списку
-        if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
-            throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
-
-        // Отримуємо курс по ID
-        List<Course> courses = courseDao.getById(id);
-        if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
-        Course course = courses.getFirst();
+        if (!this.checkIfUserExistsInCourse(id, userId)
+                && !authUserService.isCurrentAuthUserAdmin())
+            throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
 
         List<Long> courseUsersId = courseDao.getCourseUsersIdByCourseId(id);
         // Формуємо список користувачів
@@ -141,10 +132,11 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public AddUserToCourseResponse addUserToCourse(Long userId, Long id) {
-        boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
+        Course course = this.findCourseOrThrow(id);
         // Перевіряємо, що поточний користувач є в цьому списку
-        if (!userExistsInCourse && !authUserService.isCurrentAuthUserAdmin())
-            throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
+        if (!this.checkIfUserExistsInCourse(course.getId(), userId)
+                && !authUserService.isCurrentAuthUserAdmin())
+            throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Додаємо користувача до курсу
         courseDao.addUserToCourse(id, userId);
         return new AddUserToCourseResponse(id, userId);
@@ -155,10 +147,10 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public DeleteUserFromCourseResponse deleteUserFromCourse(Long userId, Long id) {
-        boolean userExistsInCourse = this.checkIfUserExistsInCourse(id, userId);
+        Course course = this.findCourseOrThrow(id);
         // Перевіряємо, що поточний користувач є в цьому списку
-        if (!userExistsInCourse)
-            throw new ProgPlatformException(ErrorConsts.INSUFFICIENT_RIGHTS);
+        if (!this.checkIfUserExistsInCourse(course.getId(), userId))
+            throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Видаляємо користувача з курсу
         courseDao.removeUserFromCourse(id, userId);
         return new DeleteUserFromCourseResponse(userId);
@@ -169,13 +161,18 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public boolean checkIfUserExistsInCourse(Long id, Long userId) {
-        // Отримуємо курс по ID
-        List<Course> courses = courseDao.getById(id);
-        if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
-        Course course = courses.getFirst();
         // Отримуємо список ID користувачів по ID курсу
-        List<Long> courseUsersId = courseDao.getCourseUsersIdByCourseId(course.getId());
+        List<Long> courseUsersId = courseDao.getCourseUsersIdByCourseId(id);
         return courseUsersId.contains(userId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Course findCourseOrThrow(Long id) {
+        return this.courseDao.getById(id).stream()
+                .findFirst()
+                .orElseThrow(() -> new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND));
     }
 
     /**
@@ -183,10 +180,15 @@ public class CourseServiceImpl implements CourseServiceI {
      */
     @Override
     public CourseResponse getCourseById(Long id) {
+        // Отримуємо поточного користувача в системі
+        User currentAuthUser = authUserService.getCurrentAuthUser();
+
         // Отримуємо курс по ID
-        Course course = this.courseDao.getById(id).stream()
-                .findFirst()
-                .orElseThrow(() -> new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND));
+        Course course = this.findCourseOrThrow(id);
+
+        // Перевіряємо, що поточний користувач присутній в списку
+        if (!this.checkIfUserExistsInCourse(id, currentAuthUser.getId()))
+            throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
 
         return this.courseToCourseResponseConverter.convert(course);
     }
