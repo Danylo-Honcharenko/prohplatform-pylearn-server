@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.function;
 
+import org.ua.fkrkm.progplatformclientlib.data.UserData;
+import org.ua.fkrkm.progplatformclientlib.data.LoginUserData;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.http.HttpHeaders;
@@ -71,14 +73,14 @@ public class GenerateJwtTokenAndPrepareResponse implements Function<UserLoginReq
         // Встановлюємо токен в Cookie відповіді
         this.setJwtTokenToCookie(token);
         // Заповняємо відповідь
-        return LoginUserResponse.builder()
+        return new LoginUserResponse(LoginUserData.builder()
                 .id(user.getId())
                 .firstName(user.getFirst_name())
                 .lastName(user.getLast_name())
                 .role(this.getRoleNameById(user.getRoleId()))
                 .created(user.getCreated())
                 .tokenExpirationDate(tokenInfo.getExpired())
-                .build();
+                .build());
     }
 
     /**

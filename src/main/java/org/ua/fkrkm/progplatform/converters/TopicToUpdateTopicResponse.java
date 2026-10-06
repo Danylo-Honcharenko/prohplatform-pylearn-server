@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.UpdateTopicData;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.entity.Topic;
@@ -10,11 +11,11 @@ public class TopicToUpdateTopicResponse implements Converter<Topic, UpdateTopicR
 
     @Override
     public UpdateTopicResponse convert(Topic source) {
-        return UpdateTopicResponse.builder()
+        return new UpdateTopicResponse(UpdateTopicData.builder()
                 .id(source.getId())
                 .name(source.getName())
                 .description(source.getDescription())
                 .updated(source.getUpdated())
-                .build();
+                .build());
     }
 }

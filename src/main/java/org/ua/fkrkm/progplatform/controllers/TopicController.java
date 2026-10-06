@@ -30,7 +30,7 @@ public class TopicController {
      * Отримати всі теми модуля
      *
      * @param moduleId ID модуля
-     * @return Response<GetAllCourseTopics> відповідь API
+     * @return GetAllCourseTopics відповідь API
      */
     @Operation(
             summary = "Отримати всі теми модуля"
@@ -43,15 +43,15 @@ public class TopicController {
     @SecurityRequirement(name = "Bearer Authentication")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/getAllModuleTopics")
-    public Response<GetAllModuleTopics> getAllModuleTopics(@Parameter(description = "ID модуля") @RequestParam(name = "moduleId") Long moduleId) {
-        return new Response<>(HttpStatus.OK, topicService.getAllModuleTopics(moduleId));
+    public GetAllModuleTopics getAllModuleTopics(@Parameter(description = "ID модуля") @RequestParam(name = "moduleId") Long moduleId) {
+        return topicService.getAllModuleTopics(moduleId);
     }
 
     /**
      * Отримати тему по ID
      *
      * @param topicId ID теми
-     * @return Response<TopicResponse> відповідь API
+     * @return TopicResponse відповідь API
      */
     @Operation(
             summary = "Отримати тему по ID"
@@ -63,7 +63,7 @@ public class TopicController {
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/get")
-    public Response<TopicResponse> getTopicById(@Parameter(description = "ID теми") @RequestParam(name = "topicId") Long topicId) {
-        return new Response<>(HttpStatus.OK, topicService.getTopicById(topicId));
+    public TopicResponse getTopicById(@Parameter(description = "ID теми") @RequestParam(name = "topicId") Long topicId) {
+        return topicService.getTopicById(topicId);
     }
 }

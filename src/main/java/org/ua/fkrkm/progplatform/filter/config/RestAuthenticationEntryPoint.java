@@ -11,7 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.progplatformclientlib.response.ErrorResponse;
-import org.ua.fkrkm.progplatformclientlib.response.Response;
+import org.ua.fkrkm.progplatformclientlib.data.ErrorData;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -30,9 +30,9 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Response<ErrorResponse> error = new Response<>(
+        ErrorResponse error = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED,
-                new ErrorResponse(
+                new ErrorData(
                         "Неавторизовано",
                         "Потрібно виконати вхід у систему",
                         MDC.get("msid")

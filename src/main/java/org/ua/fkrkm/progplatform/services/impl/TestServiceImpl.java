@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.services.impl;
 
+import org.ua.fkrkm.progplatformclientlib.data.CheckTestAnswersResultData;
+import org.ua.fkrkm.progplatformclientlib.data.GetAllTestData;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
@@ -70,7 +72,7 @@ public class TestServiceImpl implements TestServiceI {
         List<TestView> tests= testDao.getAll().stream()
                 .map(testTestViewConverter::convert)
                 .toList();
-        return new GetAllTestResponse(tests);
+        return new GetAllTestResponse(new GetAllTestData(tests));
     }
 
     /**
@@ -92,7 +94,7 @@ public class TestServiceImpl implements TestServiceI {
         List<TestView> test = testDao.getByTopicId(topicId).stream()
                 .map(testTestViewConverter::convert)
                 .toList();
-        return new GetAllTestResponse(test);
+        return new GetAllTestResponse(new GetAllTestData(test));
     }
 
     /**
@@ -133,7 +135,7 @@ public class TestServiceImpl implements TestServiceI {
                 .build();
         testResultDao.create(testResult);
         // Формуємо відповідь API
-        return new CheckTestAnswersResultResponse(maxAssessment, currentAssessment, correctAnswers, wrongAnswers, created);
+        return new CheckTestAnswersResultResponse(new CheckTestAnswersResultData(maxAssessment, currentAssessment, correctAnswers, wrongAnswers, created));
     }
 
     /**

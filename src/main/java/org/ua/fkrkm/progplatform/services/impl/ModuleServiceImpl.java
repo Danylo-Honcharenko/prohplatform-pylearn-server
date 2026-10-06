@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.services.impl;
 
+import org.ua.fkrkm.progplatformclientlib.data.ModulesData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.DuplicateKeyException;
@@ -60,7 +61,7 @@ public class ModuleServiceImpl implements ModuleServiceI {
                 .map(this.moduleToModuleViewConverter::convert)
                 .peek((module) -> this.setModuleCompletePercent(module, moduleStateViews))
                 .toList();
-        return new ModulesResponse(modules);
+        return new ModulesResponse(new ModulesData(modules));
     }
 
     /**

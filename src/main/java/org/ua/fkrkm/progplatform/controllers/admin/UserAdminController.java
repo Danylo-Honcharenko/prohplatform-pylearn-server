@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
@@ -31,7 +30,7 @@ public class UserAdminController {
     /**
      * Отримання всіх користувачів
      *
-     * @return Response<GetAllUsersResponse> відповідь API
+     * @return GetAllUsersResponse відповідь API
      */
     @Operation(
             summary = "Отримати всіх користувачів"
@@ -43,15 +42,15 @@ public class UserAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/getAll")
-    public Response<GetAllUsersResponse> getAllUser(@Parameter(description = "Кількість записів") @RequestParam(name = "recordLimit", required = false) Integer recordLimit) {
-        return new Response<>(HttpStatus.OK, userService.getAllUsers(recordLimit));
+    public GetAllUsersResponse getAllUser(@Parameter(description = "Кількість записів") @RequestParam(name = "recordLimit", required = false) Integer recordLimit) {
+        return userService.getAllUsers(recordLimit);
     }
 
     /**
      * Оновлення ролі користувача
      *
      * @param updateUserRoleRequest запит
-     * @return Response<UpdateUserRoleResponse> відповідь API
+     * @return UpdateUserRoleResponse відповідь API
      */
     @Operation(
             summary = "Оновити роль користувачу"
@@ -64,7 +63,7 @@ public class UserAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/updateRole")
-    public Response<UpdateUserRoleResponse> updateUserRole(@Valid @RequestBody UpdateUserRoleRequest updateUserRoleRequest) {
-        return new Response<>(HttpStatus.OK, userService.updateUserRole(updateUserRoleRequest));
+    public UpdateUserRoleResponse updateUserRole(@Valid @RequestBody UpdateUserRoleRequest updateUserRoleRequest) {
+        return userService.updateUserRole(updateUserRoleRequest);
     }
 }

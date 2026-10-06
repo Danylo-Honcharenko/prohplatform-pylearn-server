@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.TopicData;
+import org.ua.fkrkm.progplatformclientlib.data.CreateTopicData;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.entity.Topic;
@@ -10,11 +12,11 @@ public class TopicToCreateTopicResponse implements Converter<Topic, CreateTopicR
 
     @Override
     public CreateTopicResponse convert(Topic source) {
-        return CreateTopicResponse.builder()
+        return new CreateTopicResponse(CreateTopicData.builder()
                 .id(source.getId())
                 .name(source.getName())
                 .description(source.getDescription())
                 .created(source.getCreated())
-                .build();
+                .build());
     }
 }

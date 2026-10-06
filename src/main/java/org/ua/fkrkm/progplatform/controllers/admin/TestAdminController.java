@@ -30,7 +30,7 @@ public class TestAdminController {
      * Створити тест
      *
      * @param request запит для створення тесту
-     * @return Response<CreateTestResponse> відповідь API
+     * @return CreateTestResponse відповідь API
      */
     @Operation(
             summary = "Створити тест"
@@ -44,7 +44,7 @@ public class TestAdminController {
     @SecurityRequirement(name = "Bearer Authentication")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
-    public Response<CreateTestResponse> create(@Valid @RequestBody CreateTestRequest request) {
-        return new Response<>(HttpStatus.CREATED, testService.create(request));
+    public CreateTestResponse create(@Valid @RequestBody CreateTestRequest request) {
+        return testService.create(request);
     }
 }

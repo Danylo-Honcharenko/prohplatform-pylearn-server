@@ -4,25 +4,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.ua.fkrkm.progplatform.services.impl.TopicServiceImpl;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class TopicControllerTest {
 
     private TopicController topicController;
+    private TopicServiceImpl topicService;
 
     @BeforeEach
     public void setUp() {
-        this.topicController = new TopicController(mock(TopicServiceImpl.class));
+        this.topicService = mock(TopicServiceImpl.class);
+        this.topicController = new TopicController(topicService);
     }
 
     @Test
     public void getAllModuleTopicsTest() {
-        assertNotNull(topicController.getAllModuleTopics(1L));
+        topicController.getAllModuleTopics(1L);
+        verify(topicService).getAllModuleTopics(1L);
     }
 
     @Test
     public void getTopicByIdTest() {
-        assertNotNull(topicController.getTopicById(1L));
+        topicController.getTopicById(1L);
+        verify(topicService).getTopicById(1L);
     }
 }

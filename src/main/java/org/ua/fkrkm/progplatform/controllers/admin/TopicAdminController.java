@@ -32,7 +32,7 @@ public class TopicAdminController {
      * Створити тему
      *
      * @param request запит
-     * @return Response<CreateTopicResponse> відповідь API
+     * @return CreateTopicResponse відповідь API
      */
     @Operation(
             summary = "Створити тему"
@@ -46,15 +46,15 @@ public class TopicAdminController {
     @SecurityRequirement(name = "Bearer Authentication")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
-    public Response<CreateTopicResponse> create(@Valid @RequestBody CreateTopicRequest request) {
-        return new Response<>(HttpStatus.CREATED, topicService.create(request));
+    public CreateTopicResponse create(@Valid @RequestBody CreateTopicRequest request) {
+        return topicService.create(request);
     }
 
     /**
      * Оновити тему
      *
      * @param request запит
-     * @return Response<UpdateTopicResponse> відповідь API
+     * @return UpdateTopicResponse відповідь API
      */
     @Operation(
             summary = "Оновити тему"
@@ -67,15 +67,15 @@ public class TopicAdminController {
     @SecurityRequirement(name = "Bearer Authentication")
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/update")
-    public Response<UpdateTopicResponse> update(@RequestBody UpdateTopicRequest request) {
-        return new Response<>(HttpStatus.OK, topicService.update(request));
+    public UpdateTopicResponse update(@RequestBody UpdateTopicRequest request) {
+        return topicService.update(request);
     }
 
     /**
      * Видалити тему
      *
      * @param id ID теми
-     * @return Response<DeleteTopicResponse> відповідь API
+     * @return DeleteTopicResponse відповідь API
      */
     @Operation(
             summary = "Видалити тему"
@@ -88,7 +88,7 @@ public class TopicAdminController {
     @SecurityRequirement(name = "Bearer Authentication")
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/delete")
-    public Response<DeleteTopicResponse> delete(@Parameter(description = "ID теми") @RequestParam(name = "id") Long id) {
-        return new Response<>(HttpStatus.OK, topicService.delete(id));
+    public DeleteTopicResponse delete(@Parameter(description = "ID теми") @RequestParam(name = "id") Long id) {
+        return topicService.delete(id);
     }
 }

@@ -29,6 +29,8 @@ import org.ua.fkrkm.progplatformclientlib.request.UserRegistrationRequest;
 import org.ua.fkrkm.progplatformclientlib.response.CreateUserResponse;
 import org.ua.fkrkm.progplatformclientlib.response.CurrentUserResponse;
 import org.ua.fkrkm.progplatformclientlib.response.LogoutResponse;
+import org.ua.fkrkm.progplatformclientlib.data.CreateUserData;
+import org.ua.fkrkm.progplatformclientlib.data.CurrentUserData;
 
 import java.util.Date;
 import java.util.List;
@@ -76,7 +78,7 @@ public class UserServiceTest {
                 .thenReturn(1);
 
         when(createUserResponseConverter.convert(any(User.class)))
-                .thenReturn(CreateUserResponse.builder().build());
+                .thenReturn(new CreateUserResponse(CreateUserData.builder().build()));
 
         assertNotNull(userService.registration(request));
     }
@@ -130,7 +132,7 @@ public class UserServiceTest {
 
         LogoutResponse logoutResponse = userService.logout(request, response);
 
-        assertEquals("LOGOUT", logoutResponse.getStatus());
+        assertEquals("LOGOUT", logoutResponse.getData().getStatus());
     }
 
     @Test
@@ -139,7 +141,7 @@ public class UserServiceTest {
                 .thenReturn(User.builder().build());
 
         when(currentUserResponseConverter.convert(any(User.class)))
-                .thenReturn(CurrentUserResponse.builder().build());
+                .thenReturn(new CurrentUserResponse(CurrentUserData.builder().build()));
 
         assertNotNull(userService.getCurrentUser());
     }

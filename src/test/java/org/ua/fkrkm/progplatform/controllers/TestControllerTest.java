@@ -5,35 +5,42 @@ import org.junit.jupiter.api.Test;
 import org.ua.fkrkm.progplatform.services.impl.TestServiceImpl;
 import org.ua.fkrkm.progplatformclientlib.request.CheckTestAnswersRequest;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class TestControllerTest {
 
     private TestController testController;
+    private TestServiceImpl testService;
 
     @BeforeEach
     public void setUp() {
-        this.testController = new TestController(mock(TestServiceImpl.class));
+        this.testService = mock(TestServiceImpl.class);
+        this.testController = new TestController(testService);
     }
 
     @Test
     public void checkTest() {
-        assertNotNull(testController.check(new CheckTestAnswersRequest()));
+        CheckTestAnswersRequest request = new CheckTestAnswersRequest();
+        testController.check(request);
+        verify(testService).check(request);
     }
 
     @Test
     public void getTestByUUID() {
-        assertNotNull(testController.getTestByUUID("uuid"));
+        testController.getTestByUUID("uuid");
+        verify(testService).getTestByUUID("uuid");
     }
 
     @Test
     public void getAllTest() {
-        assertNotNull(testController.getAll());
+        testController.getAll();
+        verify(testService).getAll();
     }
 
     @Test
     public void getTestResultByUserIdTest() {
-        assertNotNull(testController.getAllUserTestResult());
+        testController.getAllUserTestResult();
+        verify(testService).getAllUserTestResult();
     }
 }

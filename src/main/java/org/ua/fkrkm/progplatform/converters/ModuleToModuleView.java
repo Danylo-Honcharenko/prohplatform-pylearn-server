@@ -15,6 +15,8 @@ public class ModuleToModuleView implements Converter<Module, ModuleView> {
                 .id(source.getId())
                 .name(source.getName())
                 .description(source.getDescription())
+                .created(source.getCreated())
+                .updated(source.getUpdated())
                 .build();
     }
 }

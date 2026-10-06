@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformExceptionBadRequest;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatformclientlib.response.*;
+import org.ua.fkrkm.progplatformclientlib.data.ErrorData;
+import org.ua.fkrkm.progplatformclientlib.data.FieldValidData;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 
 import java.util.HashMap;
@@ -28,13 +30,13 @@ public class ErrorHandleController {
      * Помилка серверу
      *
      * @param ex помилка
-     * @return Response<ErrorResponse> відповідь API
+     * @return ErrorResponse відповідь API
      */
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Response<ErrorResponse> error(Exception ex) {
+    public ErrorResponse error(Exception ex) {
         log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
-        return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR, new ErrorResponse(
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, new ErrorData(
                 "Помилка серверу", "Помилка серверу. Спробуйте ще раз", MDC.get("msid")
         ));
     }
@@ -43,13 +45,13 @@ public class ErrorHandleController {
      * Помилка
      *
      * @param ex помилка
-     * @return Response<ErrorResponse> відповідь API
+     * @return ErrorResponse відповідь API
      */
     @ExceptionHandler(value = ProgPlatformException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Response<ErrorResponse> errorProg(ProgPlatformException ex) {
+    public ErrorResponse errorProg(ProgPlatformException ex) {
         log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
-        return new Response<>(HttpStatus.BAD_REQUEST, new ErrorResponse(
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, new ErrorData(
                 "Помилка", ex.getMessage(), MDC.get("msid")
         ));
     }
@@ -58,13 +60,13 @@ public class ErrorHandleController {
      * Помилка
      *
      * @param ex помилка
-     * @return Response<ErrorResponse> відповідь API
+     * @return ErrorResponse відповідь API
      */
     @ExceptionHandler(value = ProgPlatformExceptionBadRequest.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Response<ErrorResponse> errorProg(ProgPlatformExceptionBadRequest ex) {
+    public ErrorResponse errorProg(ProgPlatformExceptionBadRequest ex) {
         log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
-        return new Response<>(HttpStatus.BAD_REQUEST, new ErrorResponse(
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, new ErrorData(
                 "Помилка", ex.getMessage(), MDC.get("msid")
         ));
     }
@@ -73,13 +75,13 @@ public class ErrorHandleController {
      * Не знайдено
      *
      * @param ex помилка
-     * @return Response<ErrorResponse> відповідь API
+     * @return ErrorResponse відповідь API
      */
     @ExceptionHandler(value = ProgPlatformNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Response<ErrorResponse> errorProgNotFound(ProgPlatformNotFoundException ex) {
+    public ErrorResponse errorProgNotFound(ProgPlatformNotFoundException ex) {
         log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), ex.getMessage(), ex);
-        return new Response<>(HttpStatus.NOT_FOUND, new ErrorResponse(
+        return new ErrorResponse(HttpStatus.NOT_FOUND, new ErrorData(
                 "Не знайдено об'єкт", ex.getMessage(), MDC.get("msid")
         ));
     }
@@ -88,13 +90,13 @@ public class ErrorHandleController {
      * Помилка відмови в доступі
      *
      * @param e помилка
-     * @return Response<ErrorResponse> відповідь API
+     * @return ErrorResponse відповідь API
      */
     @ExceptionHandler(value = AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Response<ErrorResponse> accessDenied(AccessDeniedException e) {
+    public ErrorResponse accessDenied(AccessDeniedException e) {
         log.error("MSID: {}, Повідомлення помилки: {}", MDC.get("msid"), e.getMessage(), e);
-        return new Response<>(HttpStatus.FORBIDDEN, new ErrorResponse(
+        return new ErrorResponse(HttpStatus.FORBIDDEN, new ErrorData(
                 "Відмовлено в доступі", "У вас не має доступу до ресурсу", MDC.get("msid")
         ));
     }
@@ -103,11 +105,11 @@ public class ErrorHandleController {
      * Помилка валідації вхідних параметрів
      *
      * @param ex помилка
-     * @return Response<FieldValidResponse> відповідь API
+     * @return FieldValidResponse відповідь API
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Response<FieldValidResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public FieldValidResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
 
@@ -117,7 +119,7 @@ public class ErrorHandleController {
             errors.put(fieldName, errorMessage);
         });
 
-        return new Response<>(HttpStatus.BAD_REQUEST, new FieldValidResponse(
+        return new FieldValidResponse(new FieldValidData(
                 "Помилка валідції вхідних параметрів", errors
         ));
     }

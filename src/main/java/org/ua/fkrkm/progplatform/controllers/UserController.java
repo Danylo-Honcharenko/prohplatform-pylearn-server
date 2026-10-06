@@ -34,7 +34,7 @@ public class UserController {
      * Створення користувача
      *
      * @param request запит
-     * @return Response<CreateUserResponse> відповідь API
+     * @return CreateUserResponse відповідь API
      */
     @Operation(
             summary = "Зареєструватися"
@@ -47,8 +47,8 @@ public class UserController {
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/registration")
-    public Response<CreateUserResponse> registration(@Valid @RequestBody UserRegistrationRequest request) {
-        return new Response<>(HttpStatus.CREATED, userService.registration(request));
+    public CreateUserResponse registration(@Valid @RequestBody UserRegistrationRequest request) {
+        return userService.registration(request);
     }
 
     /**
@@ -56,7 +56,7 @@ public class UserController {
      *
      * @param request запит
      * @param response відповідь
-     * @return Response<LoginUserResponse> відповідь API
+     * @return LoginUserResponse відповідь API
      */
     @Operation(
             summary = "Авторизуватися"
@@ -68,16 +68,16 @@ public class UserController {
     })
     @ResponseBody
     @PostMapping("/login")
-    public Response<LoginUserResponse> login(@Valid @RequestBody UserLoginRequest request,
+    public LoginUserResponse login(@Valid @RequestBody UserLoginRequest request,
                                              HttpServletResponse response) {
-        return new Response<>(HttpStatus.OK, userService.login(request, response));
+        return userService.login(request, response);
     }
 
     /**
      * Вийти із системи
      *
      * @param request запит
-     * @return Response<LogoutResponse> відповідь API
+     * @return LogoutResponse відповідь API
      */
     @Operation(
             summary = "Вийти із системе"
@@ -88,15 +88,15 @@ public class UserController {
     })
     @ResponseBody
     @PostMapping("/logout")
-    public Response<LogoutResponse> logout(HttpServletRequest request, HttpServletResponse response) {
-        return new Response<>(HttpStatus.OK, userService.logout(request, response));
+    public LogoutResponse logout(HttpServletRequest request, HttpServletResponse response) {
+        return userService.logout(request, response);
     }
 
     /**
      * Оновити дані користувача
      *
      * @param request запит
-     * @return Response<UpdateUserResponse> відповідь API
+     * @return UpdateUserResponse відповідь API
      */
     @Operation(
             summary = "Оновити дані"
@@ -108,15 +108,15 @@ public class UserController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @PatchMapping("/auth/update")
-    public Response<UpdateUserResponse> update(@RequestBody UpdateUserRequest request) {
-        return new Response<>(HttpStatus.OK, userService.update(request));
+    public UpdateUserResponse update(@RequestBody UpdateUserRequest request) {
+        return userService.update(request);
     }
 
     /**
      * Оновити пароль користувача
      *
      * @param request запит
-     * @return Response<ChangePasswordResponse> відповідь API
+     * @return ChangePasswordResponse відповідь API
      */
     @Operation(
             summary = "Оновити пароль користувача"
@@ -128,14 +128,14 @@ public class UserController {
     })
     @ResponseBody
     @PutMapping("/updatePassword")
-    public Response<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-        return new Response<>(HttpStatus.OK, userService.changePassword(request));
+    public ChangePasswordResponse changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        return userService.changePassword(request);
     }
 
     /**
      * Отримати інформацію про поточного користувача в системі
      *
-     * @return Response<CurrentUserResponse> відповідь API
+     * @return CurrentUserResponse відповідь API
      */
     @Operation(
             summary = "Отримати інформацію про поточного користувача в системі"
@@ -147,14 +147,14 @@ public class UserController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/auth/me")
-    public Response<CurrentUserResponse> getCurrentUser() {
-        return new Response<>(HttpStatus.OK, userService.getCurrentUser());
+    public CurrentUserResponse getCurrentUser() {
+        return userService.getCurrentUser();
     }
 
     /**
      * Отримати користувача по заданим параметрам
      *
-     * @return Response<CurrentUserResponse> відповідь API
+     * @return CurrentUserResponse відповідь API
      */
     @Operation(
             summary = "Отримати користувача по заданим параметрам"
@@ -166,17 +166,17 @@ public class UserController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/auth/getUser")
-    public Response<UserResponse> getUserByParams(@Parameter(description = "Ім'я") @RequestParam(name = "firstName", required = false) String firstName,
+    public UserResponse getUserByParams(@Parameter(description = "Ім'я") @RequestParam(name = "firstName", required = false) String firstName,
                                                   @Parameter(description = "Фамілія") @RequestParam(name = "lastName", required = false) String lastName,
                                                   @Parameter(description = "Email") @RequestParam(name = "email", required = false) String email) {
-        return new Response<>(HttpStatus.OK, userService.getUserByParams(firstName, lastName, email));
+        return userService.getUserByParams(firstName, lastName, email);
     }
 
     /**
      * Видалити користувача по ID
      *
      * @param id ID користувача
-     * @return Response<DeleteUserResponse> відповідь API
+     * @return DeleteUserResponse відповідь API
      */
     @Operation(
             summary = "Видалити користувача по ID"
@@ -188,7 +188,7 @@ public class UserController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/auth/delete")
-    public Response<DeleteUserResponse> delete(@Parameter(description = "ID користувача") @RequestParam(name = "id") Long id) {
-        return new Response<>(HttpStatus.OK, userService.delete(id));
+    public DeleteUserResponse delete(@Parameter(description = "ID користувача") @RequestParam(name = "id") Long id) {
+        return userService.delete(id);
     }
 }

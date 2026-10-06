@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.UserData;
+import org.ua.fkrkm.progplatformclientlib.data.UpdateUserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
@@ -28,13 +30,13 @@ public class UserToUpdateUserResponse implements Converter<User, UpdateUserRespo
         List<Role> roles = roleDao.getById(source.getRoleId());
         if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
         Role role = roles.getFirst();
-        return UpdateUserResponse.builder()
+        return new UpdateUserResponse(UpdateUserData.builder()
                 .firstName(source.getFirst_name())
                 .lastName(source.getLast_name())
                 .email(source.getEmail())
                 .role(role.getName())
                 .created(source.getCreated())
                 .updated(source.getUpdated())
-                .build();
+                .build());
     }
 }

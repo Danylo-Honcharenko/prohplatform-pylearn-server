@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
@@ -30,7 +29,7 @@ public class TestController {
      * Перевірити тест
      *
      * @param request тест для перевірки
-     * @return Response<CheckTestAnswersResultResponse> відповідь API
+     * @return CheckTestAnswersResultResponse відповідь API
      */
     @Operation(
             summary = "Перевірити тест"
@@ -42,15 +41,15 @@ public class TestController {
     })
     @ResponseBody
     @PostMapping("/check")
-    public Response<CheckTestAnswersResultResponse> check(@RequestBody CheckTestAnswersRequest request) {
-        return new Response<>(HttpStatus.OK, testService.check(request));
+    public CheckTestAnswersResultResponse check(@RequestBody CheckTestAnswersRequest request) {
+        return testService.check(request);
     }
 
     /**
      * Отримати тест по UUID
      *
      * @param uuid UUID тесту
-     * @return Response<GetTestResponse> відповідь API
+     * @return GetTestResponse відповідь API
      */
     @Operation(
             summary = "Отримати тест по UUID"
@@ -61,14 +60,14 @@ public class TestController {
     })
     @ResponseBody
     @GetMapping("/get")
-    public Response<GetTestResponse> getTestByUUID(@Parameter(description = "ID тесту") @RequestParam(name = "uuid") String uuid) {
-        return new Response<>(HttpStatus.OK, testService.getTestByUUID(uuid));
+    public GetTestResponse getTestByUUID(@Parameter(description = "ID тесту") @RequestParam(name = "uuid") String uuid) {
+        return testService.getTestByUUID(uuid);
     }
 
     /**
      * Отримати всі тести
      *
-     * @return Response<GetAllTestResponse> відповідь API
+     * @return GetAllTestResponse відповідь API
      */
     @Operation(
             summary = "Отримати всі тести"
@@ -79,14 +78,14 @@ public class TestController {
     })
     @ResponseBody
     @GetMapping("/getAll")
-    public Response<GetAllTestResponse> getAll() {
-        return new Response<>(HttpStatus.OK, testService.getAll());
+    public GetAllTestResponse getAll() {
+        return testService.getAll();
     }
 
     /**
      * Отримати всі результати тестування користувача
      *
-     * @return Response<TestResultsResponse> відповідь API
+     * @return TestResultsResponse відповідь API
      */
     @Operation(
             summary = "Отримати всі результати тестування по ID користувача"
@@ -97,7 +96,7 @@ public class TestController {
     })
     @ResponseBody
     @GetMapping("/getTestsResults")
-    public Response<TestResultsResponse> getAllUserTestResult() {
-        return new Response<>(HttpStatus.OK, testService.getAllUserTestResult());
+    public TestResultsResponse getAllUserTestResult() {
+        return testService.getAllUserTestResult();
     }
 }

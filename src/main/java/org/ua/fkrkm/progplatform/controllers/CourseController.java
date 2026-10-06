@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.services.CourseServiceI;
@@ -34,15 +33,15 @@ public class CourseController {
     })
     @ResponseBody
     @GetMapping("/getAll")
-    public Response<GetAllCoursesResponse> getAllCourses() {
-        return new Response<>(HttpStatus.OK, courseService.getAllCourses());
+    public GetAllCoursesResponse getAllCourses() {
+        return this.courseService.getAllCourses();
     }
 
     /**
      * Отримати користувачів курсу
      *
      * @param id ID курсу
-     * @return Response<CourseUsersResponse> відповідь API
+     * @return CourseUsersResponse відповідь API
      */
     @Operation(
             summary = "Отримати користувачів курсу",
@@ -54,15 +53,15 @@ public class CourseController {
     })
     @ResponseBody
     @GetMapping("/{id}/getUsers")
-    public Response<CourseUsersResponse> getCourseUsers(@Parameter(description = "ID курсу") @PathVariable Long id) {
-        return new Response<>(HttpStatus.OK, courseService.getCourseUsers(id));
+    public CourseUsersResponse getCourseUsers(@Parameter(description = "ID курсу") @PathVariable Long id) {
+        return courseService.getCourseUsers(id);
     }
 
     /**
      * Отримати курс по ID
      *
      * @param id ID курсу
-     * @return Response<CourseResponse> відповідь API
+     * @return CourseResponse відповідь API
      */
     @Operation(
             summary = "Отримати курс по ID"
@@ -73,14 +72,14 @@ public class CourseController {
     })
     @ResponseBody
     @GetMapping("/{id}")
-    public Response<CourseResponse> getCourseById(@Parameter(description = "ID курсу") @PathVariable Long id) {
-        return new Response<>(HttpStatus.OK, courseService.getCourseById(id));
+    public CourseResponse getCourseById(@Parameter(description = "ID курсу") @PathVariable Long id) {
+        return this.courseService.getCourseById(id);
     }
 
     /**
      * Отримати курси користувача
      *
-     * @return Response<UserCourseResponse> відповідь API
+     * @return UserCourseResponse відповідь API
      */
     @Operation(
             summary = "Отримати курси користувача"
@@ -91,7 +90,7 @@ public class CourseController {
     })
     @ResponseBody
     @GetMapping("/getUserCourse")
-    public Response<UserCourseResponse> getUserCourses() {
-        return new Response<>(HttpStatus.OK, courseService.getUserCourses());
+    public UserCourseResponse getUserCourses() {
+        return this.courseService.getUserCourses();
     }
 }

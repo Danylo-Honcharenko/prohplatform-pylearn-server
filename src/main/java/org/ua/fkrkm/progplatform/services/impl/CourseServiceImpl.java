@@ -1,5 +1,10 @@
 package org.ua.fkrkm.progplatform.services.impl;
 
+import org.ua.fkrkm.progplatformclientlib.data.AddUserToCourseData;
+import org.ua.fkrkm.progplatformclientlib.data.CourseUsersData;
+import org.ua.fkrkm.progplatformclientlib.data.DeleteCourseData;
+import org.ua.fkrkm.progplatformclientlib.data.DeleteUserFromCourseData;
+import org.ua.fkrkm.progplatformclientlib.data.UpdateCourseData;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
@@ -12,6 +17,7 @@ import org.ua.fkrkm.progplatform.converters.MultiConverter;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformAccessDeniedException;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.function.*;
+import org.ua.fkrkm.progplatformclientlib.data.CourseData;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
 import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
@@ -37,7 +43,7 @@ public class CourseServiceImpl implements CourseServiceI {
     // Сервіс для роботи з поточним користувачем в системі
     private final AuthUserServiceI authUserService;
     // Конвертор
-    private final MultiConverter<Course, CourseResponse> courseToCourseResponseConverter;
+    private final MultiConverter<Course, CourseData> courseToCourseResponseConverter;
 
     /**
      * {@inheritDoc}
@@ -77,7 +83,7 @@ public class CourseServiceImpl implements CourseServiceI {
         course.setUpdated(new Date());
         // Оновлюємо запис у базі
         courseDao.update(course);
-        return new UpdateCourseResponse(course.getId(), course.getName(), course.getDescription(), course.getUpdated());
+        return new UpdateCourseResponse(new UpdateCourseData(course.getId(), course.getName(), course.getDescription(), course.getUpdated()));
     }
 
     /**
@@ -90,7 +96,7 @@ public class CourseServiceImpl implements CourseServiceI {
         if (courses.isEmpty()) throw new ProgPlatformNotFoundException(ErrorConsts.COURSE_NOT_FOUND);
         // Видаляємо сам курс
         courseDao.delete(id);
-        return new DeleteCourseResponse(id);
+        return new DeleteCourseResponse(new DeleteCourseData(id));
     }
 
     /**
@@ -99,8 +105,8 @@ public class CourseServiceImpl implements CourseServiceI {
     @Override
     public GetAllCoursesResponse getAllCourses() {
         List<Course> courses = courseDao.getAll();
-        List<CourseResponse> courseResponses = this.courseToCourseResponseConverter.convert(courses);
-        return new GetAllCoursesResponse(courseResponses);
+        List<CourseData> courseData = this.courseToCourseResponseConverter.convert(courses);
+        return new GetAllCoursesResponse(courseData);
     }
 
     /**
@@ -124,7 +130,7 @@ public class CourseServiceImpl implements CourseServiceI {
                 // По ID користувача отримуємо інформацію з бази та створюємо список
                 .map(new GetUserInfo(userDao))
                 .toList();
-        return new CourseUsersResponse(id, course.getName(), users);
+        return new CourseUsersResponse(new CourseUsersData(id, course.getName(), users));
     }
 
     /**
@@ -139,7 +145,7 @@ public class CourseServiceImpl implements CourseServiceI {
             throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Додаємо користувача до курсу
         courseDao.addUserToCourse(id, userId);
-        return new AddUserToCourseResponse(id, userId);
+        return new AddUserToCourseResponse(new AddUserToCourseData(id, userId));
     }
 
     /**
@@ -153,7 +159,7 @@ public class CourseServiceImpl implements CourseServiceI {
             throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
         // Видаляємо користувача з курсу
         courseDao.removeUserFromCourse(id, userId);
-        return new DeleteUserFromCourseResponse(userId);
+        return new DeleteUserFromCourseResponse(new DeleteUserFromCourseData(userId));
     }
 
     /**
@@ -190,7 +196,8 @@ public class CourseServiceImpl implements CourseServiceI {
         if (!this.checkIfUserExistsInCourse(id, currentAuthUser.getId()))
             throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
 
-        return this.courseToCourseResponseConverter.convert(course);
+        CourseData courseData = this.courseToCourseResponseConverter.convert(course);
+        return new CourseResponse(courseData);
     }
 
     /**
@@ -202,8 +209,8 @@ public class CourseServiceImpl implements CourseServiceI {
         // Отримуємо всі курси користувача
         List<Course> courses = this.courseDao.getCoursesIdByUserId(authUser.getId());
 
-        List<CourseResponse> courseResponses = this.courseToCourseResponseConverter.convert(courses);
+        List<CourseData> courseData = this.courseToCourseResponseConverter.convert(courses);
 
-        return new UserCourseResponse(courseResponses);
+        return new UserCourseResponse(courseData);
     }
 }

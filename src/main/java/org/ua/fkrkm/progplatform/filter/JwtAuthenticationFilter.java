@@ -32,7 +32,7 @@ import org.ua.fkrkm.progplatform.exceptions.InvalidJwtAuthenticationException;
 import org.ua.fkrkm.progplatform.exceptions.RevokedJwtAuthenticationException;
 import org.ua.fkrkm.progplatform.services.JwtServiceI;
 import org.ua.fkrkm.progplatformclientlib.response.ErrorResponse;
-import org.ua.fkrkm.progplatformclientlib.response.Response;
+import org.ua.fkrkm.progplatformclientlib.data.ErrorData;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -222,9 +222,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Response<ErrorResponse> error = new Response<>(
+        ErrorResponse error = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED,
-                new ErrorResponse(
+                new ErrorData(
                         message,
                         detail,
                         MDC.get("msid")

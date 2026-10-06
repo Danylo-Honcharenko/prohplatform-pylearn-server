@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.UserData;
+import org.ua.fkrkm.progplatformclientlib.data.CurrentUserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -28,7 +30,7 @@ public class UserToCurrentUserResponse implements Converter<User, CurrentUserRes
     public CurrentUserResponse convert(User source) {
         int level = this.getLevelFromAllTestResultsByUserId(source.getId());
         String levelAlias = this.getLevelAliasByLevel(level);
-        return CurrentUserResponse.builder()
+        return new CurrentUserResponse(CurrentUserData.builder()
                 .id(source.getId())
                 .firstName(source.getFirst_name())
                 .lastName(source.getLast_name())
@@ -36,7 +38,7 @@ public class UserToCurrentUserResponse implements Converter<User, CurrentUserRes
                 .level(level)
                 .levelAlias(levelAlias)
                 .role(this.getRoleNameById(source.getRoleId()))
-                .build();
+                .build());
     }
 
     /**

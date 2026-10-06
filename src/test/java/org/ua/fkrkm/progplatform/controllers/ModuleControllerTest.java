@@ -5,20 +5,24 @@ import org.junit.jupiter.api.Test;
 import org.ua.fkrkm.progplatform.services.impl.ModuleServiceImpl;
 import org.ua.fkrkm.progplatformclientlib.request.SetModuleTopicCompletedRequest;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class ModuleControllerTest {
 
     private ModuleController moduleController;
+    private ModuleServiceImpl moduleService;
 
     @BeforeEach
     public void setUp() {
-        this.moduleController = new ModuleController(mock(ModuleServiceImpl.class));
+        this.moduleService = mock(ModuleServiceImpl.class);
+        this.moduleController = new ModuleController(moduleService);
     }
 
     @Test
     public void setCompletedModuleTopicTest() {
-        assertNotNull(moduleController.setCompletedModuleTopic(new SetModuleTopicCompletedRequest()));
+        SetModuleTopicCompletedRequest request = new SetModuleTopicCompletedRequest();
+        moduleController.setCompletedModuleTopic(request);
+        verify(moduleService).setCompletedModuleTopic(request);
     }
 }

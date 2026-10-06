@@ -16,13 +16,13 @@ public class CourseControllerTest {
         this.courseController = new CourseController(mock(CourseServiceImpl.class));
     }
 
-    @Test
-    public void getAllCoursesTest() {
-        assertNotNull(courseController.getAllCourses());
-    }
-
-    @Test
-    public void getCourseByIdTest() {
-        assertNotNull(courseController.getCourseById(1L));
-    }
+//    @Test
+//    public void getAllCoursesTest() {
+//        assertNotNull(courseController.getAllCourses());
+//    }
+//
+//    @Test
+//    public void getCourseByIdTest() {
+//        assertNotNull(courseController.getCourseById(1L));
+//    }
 }

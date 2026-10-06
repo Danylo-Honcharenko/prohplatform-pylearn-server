@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.SetModuleTopicCompletedData;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.entity.ModuleStat;
@@ -10,11 +11,11 @@ public class ModuleStatToCreateModuleCompleteResponse implements Converter<Modul
 
     @Override
     public SetModuleTopicCompletedResponse convert(ModuleStat source) {
-        return SetModuleTopicCompletedResponse.builder()
+        return new SetModuleTopicCompletedResponse(SetModuleTopicCompletedData.builder()
                 .id(source.getId())
                 .userId(source.getUserId())
                 .moduleId(source.getModuleId())
                 .topicId(source.getTopicId())
-                .build();
+                .build());
     }
 }

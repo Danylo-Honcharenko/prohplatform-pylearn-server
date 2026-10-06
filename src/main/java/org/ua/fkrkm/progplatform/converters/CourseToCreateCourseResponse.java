@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.CreateCourseData;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.entity.Course;
@@ -10,11 +11,11 @@ public class CourseToCreateCourseResponse implements Converter<Course, CreateCou
 
     @Override
     public CreateCourseResponse convert(Course source) {
-        return CreateCourseResponse.builder()
+        return new CreateCourseResponse(CreateCourseData.builder()
                 .id(source.getId())
                 .name(source.getName())
                 .description(source.getDescription())
                 .created(source.getCreated())
-                .build();
+                .build());
     }
 }

@@ -4,19 +4,19 @@ import lombok.AllArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.entity.Course;
-import org.ua.fkrkm.progplatformclientlib.response.CourseResponse;
+import org.ua.fkrkm.progplatformclientlib.data.CourseData;
 
 import java.util.List;
 
 @Component
 @AllArgsConstructor
-public class CourseToCourseResponse implements MultiConverter<Course, CourseResponse> {
+public class CourseToCourseResponse implements MultiConverter<Course, CourseData> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<CourseResponse> convert(List<Course> source) {
+    public List<CourseData> convert(List<Course> source) {
         return source.stream()
                 .map(this::convert)
                 .toList();
@@ -26,8 +26,8 @@ public class CourseToCourseResponse implements MultiConverter<Course, CourseResp
      * {@inheritDoc}
      */
     @Override
-    public CourseResponse convert(@NonNull Course course) {
-        return CourseResponse.builder()
+    public CourseData convert(@NonNull Course course) {
+        return CourseData.builder()
                 .id(course.getId())
                 .name(course.getName())
                 .description(course.getDescription())

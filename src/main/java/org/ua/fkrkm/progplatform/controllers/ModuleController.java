@@ -30,7 +30,7 @@ public class ModuleController {
      * Отримати модулі по ID курсу
      *
      * @param courseId ID курсу
-     * @return Response<ModulesResponse> відповідь API
+     * @return ModulesResponse відповідь API
      */
     @Operation(
             summary = "Отримати модулі по ID курсу"
@@ -42,15 +42,15 @@ public class ModuleController {
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/get")
-    public Response<ModulesResponse> getModulesByCourseId(@Parameter(description = "ID курсу") @RequestParam(name = "courseId") Long courseId) {
-        return new Response<>(HttpStatus.OK, this.moduleService.getModulesByCourseId(courseId));
+    public ModulesResponse getModulesByCourseId(@Parameter(description = "ID курсу") @RequestParam(name = "courseId") Long courseId) {
+        return this.moduleService.getModulesByCourseId(courseId);
     }
 
     /**
      * Отримати модуль по ID
      *
      * @param id ID модуля
-     * @return Response<ModuleResponse> відповідь API
+     * @return ModuleResponse відповідь API
      */
     @Operation(
             summary = "Отримати модуль по ID"
@@ -62,15 +62,15 @@ public class ModuleController {
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public Response<ModuleResponse> getModuleById(@Parameter(description = "ID модуля") @PathVariable Long id) {
-        return new Response<>(HttpStatus.OK, this.moduleService.getModuleById(id));
+    public ModuleResponse getModuleById(@Parameter(description = "ID модуля") @PathVariable Long id) {
+        return this.moduleService.getModuleById(id);
     }
 
     /**
      * Встановити пройдену тему модуля
      *
      * @param request інформація про модуль
-     * @return Response<SetModuleTopicCompletedResponse> відповідь API
+     * @return SetModuleTopicCompletedResponse відповідь API
      */
     @Operation(
             summary = "Встановити пройдену тему модуля"
@@ -83,7 +83,7 @@ public class ModuleController {
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/setCompletedTopic")
-    public Response<SetModuleTopicCompletedResponse> setCompletedModuleTopic(@RequestBody SetModuleTopicCompletedRequest request) {
-        return new Response<>(HttpStatus.CREATED, moduleService.setCompletedModuleTopic(request));
+    public SetModuleTopicCompletedResponse setCompletedModuleTopic(@RequestBody SetModuleTopicCompletedRequest request) {
+        return moduleService.setCompletedModuleTopic(request);
     }
 }

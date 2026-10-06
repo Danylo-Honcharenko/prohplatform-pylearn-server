@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.CreateTestData;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.ua.fkrkm.proglatformdao.entityMongo.Question;
@@ -14,13 +15,13 @@ public class TestCreateTestResponse implements Converter<Test, CreateTestRespons
 
     @Override
     public CreateTestResponse convert(Test source) {
-        return CreateTestResponse.builder()
+        return new CreateTestResponse(CreateTestData.builder()
                 .uuid(source.getId())
                 .name(source.getName())
                 .topicId(source.getTopicId().longValue())
                 .questions(questionsToQuestionsView(source.getQuestions()))
                 .created(source.getCreated())
-                .build();
+                .build());
     }
 
     private List<QuestionView> questionsToQuestionsView(List<Question> questions) {

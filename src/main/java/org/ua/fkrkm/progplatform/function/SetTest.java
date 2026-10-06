@@ -6,14 +6,14 @@ import org.ua.fkrkm.proglatformdao.entityMongo.Question;
 import org.ua.fkrkm.proglatformdao.entityMongo.Test;
 import org.ua.fkrkm.proglatformdao.entityMongo.view.QuestionView;
 import org.ua.fkrkm.proglatformdao.entityMongo.view.TestView;
-import org.ua.fkrkm.progplatformclientlib.response.CourseResponse;
+import org.ua.fkrkm.progplatformclientlib.data.CourseData;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class SetTest implements Consumer<CourseResponse> {
+public class SetTest implements Consumer<CourseData> {
 
     private final Function<List<Long>, List<Test>> function;
 
@@ -22,7 +22,7 @@ public class SetTest implements Consumer<CourseResponse> {
     }
 
     @Override
-    public void accept(CourseResponse courseResponse) {
+    public void accept(CourseData courseResponse) {
 //        List<ModuleView> modules = courseResponse.getModules();
 //        if (!modules.isEmpty()) {
 //            List<ModuleView> moduleViews = modules.stream()

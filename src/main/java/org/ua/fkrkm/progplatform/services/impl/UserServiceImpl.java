@@ -1,5 +1,11 @@
 package org.ua.fkrkm.progplatform.services.impl;
 
+import org.ua.fkrkm.progplatformclientlib.data.ChangePasswordData;
+import org.ua.fkrkm.progplatformclientlib.data.DeleteUserData;
+import org.ua.fkrkm.progplatformclientlib.data.GetAllUsersData;
+import org.ua.fkrkm.progplatformclientlib.data.LogoutData;
+import org.ua.fkrkm.progplatformclientlib.data.UpdateUserRoleData;
+import org.ua.fkrkm.progplatformclientlib.data.UserData;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -103,7 +109,7 @@ public class UserServiceImpl implements UserServiceI {
     public LogoutResponse logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         // Перевіряємо, що cookie встановлені
-        if (cookies == null) return new LogoutResponse("COOKIES IS NOT SET!");
+        if (cookies == null) return new LogoutResponse(new LogoutData("COOKIES IS NOT SET!"));
         Optional<Cookie> optionalCookie = Stream.of(cookies)
                 // Намагаємось знайти cookie за ім'ям
                 .filter(cookie -> cookie.getName().equals(cookiesTokenName))
@@ -133,7 +139,7 @@ public class UserServiceImpl implements UserServiceI {
 
             response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
         }
-        return new LogoutResponse(isCookiePresent ? "LOGOUT" : "CANNOT LOGOUT!");
+        return new LogoutResponse(new LogoutData(isCookiePresent ? "LOGOUT" : "CANNOT LOGOUT!"));
     }
 
     /**
@@ -181,7 +187,7 @@ public class UserServiceImpl implements UserServiceI {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         // Оновлюємо сутність у базі
         userDao.update(user);
-        return new ChangePasswordResponse();
+        return new ChangePasswordResponse(new ChangePasswordData());
     }
 
     /**
@@ -197,7 +203,7 @@ public class UserServiceImpl implements UserServiceI {
         List<Role> roles = roleDao.getById(user.getRoleId());
         if (roles.isEmpty()) throw new ProgPlatformException(ErrorConsts.ROLE_NOT_FOUND);
         Role role = roles.getFirst();
-        return new UserResponse(user.getId(), user.getFirst_name(), user.getLast_name(), user.getEmail(), role.getName());
+        return new UserResponse(new UserData(user.getId(), user.getFirst_name(), user.getLast_name(), user.getEmail(), role.getName()));
     }
 
     /**
@@ -216,7 +222,7 @@ public class UserServiceImpl implements UserServiceI {
             throw new ProgPlatformException(ErrorConsts.CANNOT_DELETE_ANOTHER_USER);
 
         userDao.delete(id);
-        return new DeleteUserResponse(id);
+        return new DeleteUserResponse(new DeleteUserData(id));
     }
 
     /**
@@ -227,7 +233,7 @@ public class UserServiceImpl implements UserServiceI {
         List<UserView> users = userDao.findAll(ObjectUtils.defaultIfNull(recordLimit, 0)).stream()
                 .map(userViewExtConverter::convert)
                 .toList();
-        return new GetAllUsersResponse(users);
+        return new GetAllUsersResponse(new GetAllUsersData(users));
     }
 
     /**
@@ -252,6 +258,6 @@ public class UserServiceImpl implements UserServiceI {
         // Встановлюємо ID нової ролі
         user.setRoleId(roleId);
         userDao.update(user);
-        return new UpdateUserRoleResponse(user.getId(), user.getEmail(), newRole.getName(), oldRole.getName());
+        return new UpdateUserRoleResponse(new UpdateUserRoleData(user.getId(), user.getEmail(), newRole.getName(), oldRole.getName()));
     }
 }

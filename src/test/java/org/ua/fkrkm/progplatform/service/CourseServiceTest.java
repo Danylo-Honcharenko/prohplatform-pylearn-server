@@ -15,8 +15,8 @@ import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
 import org.ua.fkrkm.progplatform.services.CourseServiceI;
 import org.ua.fkrkm.progplatform.services.impl.AuthUserServiceImpl;
 import org.ua.fkrkm.progplatform.services.impl.CourseServiceImpl;
+import org.ua.fkrkm.progplatformclientlib.data.CourseData;
 import org.ua.fkrkm.progplatformclientlib.request.CreateCourseRequest;
-import org.ua.fkrkm.progplatformclientlib.response.CourseResponse;
 import org.ua.fkrkm.progplatformclientlib.response.CreateCourseResponse;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -35,7 +35,7 @@ public class CourseServiceTest {
     private final ModuleDaoI moduleDao = mock(ModuleDaoImpl.class);
     private final TopicDaoI topicDao = mock(TopicDaoImpl.class);
 //    private final TestDaoI testDao = mock(TestDaoImpl.class);
-    private final MultiConverter<Course, CourseResponse> courseToCourseResponseConverter = new CourseToCourseResponse();
+    private final MultiConverter<Course, CourseData> courseToCourseResponseConverter = new CourseToCourseResponse();
 
     @BeforeEach
     public void setUp() {

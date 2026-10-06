@@ -32,7 +32,7 @@ public class CourseAdminController {
      * Створення курсу
      *
      * @param request запит
-     * @return Response<CreateCourseResponse> відповідь API
+     * @return CreateCourseResponse відповідь API
      */
     @Operation(
             summary = "Створити курс"
@@ -46,15 +46,15 @@ public class CourseAdminController {
     @SecurityRequirement(name = "Bearer Authentication")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
-    public Response<CreateCourseResponse> create(@Valid @RequestBody CreateCourseRequest request) {
-        return new Response<>(HttpStatus.CREATED, courseService.create(request));
+    public CreateCourseResponse create(@Valid @RequestBody CreateCourseRequest request) {
+        return courseService.create(request);
     }
 
     /**
      * Оновити курс
      *
      * @param request запит
-     * @return Response<UpdateCourseResponse> відповідь API
+     * @return UpdateCourseResponse відповідь API
      */
     @Operation(
             summary = "Оновити курс"
@@ -66,15 +66,15 @@ public class CourseAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @PatchMapping("/update")
-    public Response<UpdateCourseResponse> update(@RequestBody UpdateCourseRequest request) {
-        return new Response<>(HttpStatus.OK, courseService.update(request));
+    public UpdateCourseResponse update(@RequestBody UpdateCourseRequest request) {
+        return courseService.update(request);
     }
 
     /**
      * Видалити курс
      *
      * @param id ID курсу
-     * @return Response<DeleteCourseResponse> відповідь API
+     * @return DeleteCourseResponse відповідь API
      */
     @Operation(
             summary = "Видалити курс"
@@ -86,8 +86,8 @@ public class CourseAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/delete")
-    public Response<DeleteCourseResponse> delete(@Parameter(description = "ID курсу") @RequestParam(name = "id") Long id) {
-        return new Response<>(HttpStatus.OK, courseService.delete(id));
+    public DeleteCourseResponse delete(@Parameter(description = "ID курсу") @RequestParam(name = "id") Long id) {
+        return courseService.delete(id);
     }
 
     /**
@@ -95,7 +95,7 @@ public class CourseAdminController {
      *
      * @param userId ID користувача
      * @param courseId ID курсу
-     * @return Response<AddUserToCourseResponse> відповідь API
+     * @return AddUserToCourseResponse відповідь API
      */
     @Operation(
             summary = "Додати користувача до курсу"
@@ -107,9 +107,9 @@ public class CourseAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/addUserToCourse")
-    public Response<AddUserToCourseResponse> addUserToCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") Long userId,
+    public AddUserToCourseResponse addUserToCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") Long userId,
                                                              @Parameter(description = "ID курса") @RequestParam(name = "courseId") Long courseId) {
-        return new Response<>(HttpStatus.OK, courseService.addUserToCourse(userId, courseId));
+        return courseService.addUserToCourse(userId, courseId);
     }
 
     /**
@@ -117,7 +117,7 @@ public class CourseAdminController {
      *
      * @param userId ID користувача
      * @param courseId ID курсу
-     * @return Response<DeleteUserFromCourseResponse> відповідь API
+     * @return DeleteUserFromCourseResponse відповідь API
      */
     @Operation(
             summary = "Видалити користувача з курсу"
@@ -129,8 +129,8 @@ public class CourseAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/deleteUserFromCourse")
-    public Response<DeleteUserFromCourseResponse> deleteUserFromCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") Long userId,
+    public DeleteUserFromCourseResponse deleteUserFromCourse(@Parameter(description = "ID користувача") @RequestParam(name = "userId") Long userId,
                                                                        @Parameter(description = "ID курса") @RequestParam(name = "courseId") Long courseId) {
-        return new Response<>(HttpStatus.OK, courseService.deleteUserFromCourse(userId, courseId));
+        return courseService.deleteUserFromCourse(userId, courseId);
     }
 }

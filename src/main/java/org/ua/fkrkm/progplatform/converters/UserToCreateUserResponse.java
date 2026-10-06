@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.UserData;
+import org.ua.fkrkm.progplatformclientlib.data.CreateUserData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
@@ -31,14 +33,14 @@ public class UserToCreateUserResponse implements Converter<User, CreateUserRespo
      */
     @Override
     public CreateUserResponse convert(User source) {
-        return CreateUserResponse.builder()
+        return new CreateUserResponse(CreateUserData.builder()
                 .id(source.getId())
                 .firstName(source.getFirst_name())
                 .lastName(source.getLast_name())
                 .email(source.getEmail())
                 .role(getRoleName(source.getRoleId()))
                 .created(source.getCreated())
-                .build();
+                .build());
     }
 
     /**

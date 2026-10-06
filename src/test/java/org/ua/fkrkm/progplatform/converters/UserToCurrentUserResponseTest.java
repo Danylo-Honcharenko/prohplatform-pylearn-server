@@ -63,6 +63,6 @@ public class UserToCurrentUserResponseTest {
                 .thenReturn(List.of(Role.builder().name("ROLE_USER").build()));
 
         CurrentUserResponse userResponse = currentUserResponseConverter.convert(user);
-        assertEquals("Програміст-любитель", userResponse.getLevelAlias());
+        assertEquals("Програміст-любитель", userResponse.getData().getLevelAlias());
     }
 }

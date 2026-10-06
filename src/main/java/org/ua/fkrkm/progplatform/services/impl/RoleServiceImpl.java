@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.services.impl;
 
+import org.ua.fkrkm.progplatformclientlib.data.GetAllRoleData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.ua.fkrkm.proglatformdao.dao.RoleDaoI;
@@ -24,6 +25,6 @@ public class RoleServiceImpl implements RoleServiceI {
     @Override
     public GetAllRoleResponse getAll() {
         List<Role> roles = roleDao.getAll();
-        return new GetAllRoleResponse(roles);
+        return new GetAllRoleResponse(new GetAllRoleData(roles));
     }
 }

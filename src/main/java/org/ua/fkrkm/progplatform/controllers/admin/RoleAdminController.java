@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -31,7 +30,7 @@ public class RoleAdminController {
     /**
      * Отримати всі ролі
      *
-     * @return Response<GetAllRoleResponse> відповідь API
+     * @return GetAllRoleResponse відповідь API
      */
     @Operation(
             summary = "Отримати всі ролі"
@@ -43,7 +42,7 @@ public class RoleAdminController {
     @ResponseBody
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/getAll")
-    public Response<GetAllRoleResponse> getAllRole() {
-        return new Response<>(HttpStatus.OK, roleService.getAll());
+    public GetAllRoleResponse getAllRole() {
+        return roleService.getAll();
     }
 }

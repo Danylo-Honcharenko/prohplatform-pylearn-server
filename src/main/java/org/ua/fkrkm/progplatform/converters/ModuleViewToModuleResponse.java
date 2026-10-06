@@ -1,5 +1,6 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.ModuleData;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,7 @@ public class ModuleViewToModuleResponse implements Converter<ModuleView, ModuleR
 
     @Override
     public ModuleResponse convert(@NonNull ModuleView source) {
-        return ModuleResponse.builder()
+        return new ModuleResponse(ModuleData.builder()
                 .id(source.getId())
                 .name(source.getName())
                 .description(source.getDescription())
@@ -19,6 +20,6 @@ public class ModuleViewToModuleResponse implements Converter<ModuleView, ModuleR
                 .active(source.getActive())
                 .created(source.getCreated())
                 .updated(source.getUpdated())
-                .build();
+                .build());
     }
 }

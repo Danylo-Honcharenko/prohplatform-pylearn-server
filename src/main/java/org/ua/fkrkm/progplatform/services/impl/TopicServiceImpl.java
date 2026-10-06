@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.services.impl;
 
+import org.ua.fkrkm.progplatformclientlib.data.DeleteTopicData;
+import org.ua.fkrkm.progplatformclientlib.data.GetAllModuleTopicsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
@@ -103,7 +105,7 @@ public class TopicServiceImpl implements TopicServiceI {
     @Override
     public DeleteTopicResponse delete(Long id) {
         topicDao.delete(id);
-        return new DeleteTopicResponse(id);
+        return new DeleteTopicResponse(new DeleteTopicData(id));
     }
 
     /**
@@ -132,7 +134,7 @@ public class TopicServiceImpl implements TopicServiceI {
                 .peek((topicView) -> topicView.setDone(this.checkIsTopicDone(topicView.getId(), moduleStats)))
                 .toList();
 
-        return new GetAllModuleTopics(topics);
+        return new GetAllModuleTopics(new GetAllModuleTopicsData(topics));
     }
 
     /**

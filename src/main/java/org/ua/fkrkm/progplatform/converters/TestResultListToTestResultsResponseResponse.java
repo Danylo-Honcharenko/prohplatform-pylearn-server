@@ -1,5 +1,7 @@
 package org.ua.fkrkm.progplatform.converters;
 
+import org.ua.fkrkm.progplatformclientlib.data.TestResultsData;
+import org.ua.fkrkm.progplatformclientlib.data.CheckTestAnswersResultData;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.core.convert.converter.Converter;
@@ -20,20 +22,20 @@ public class TestResultListToTestResultsResponseResponse implements Converter<Li
 
     @Override
     public TestResultsResponse convert(List<TestResult> source) {
-        return TestResultsResponse.builder()
-                .results(convertListTestResultToListCheckTestAnswersResultResponse(source))
-                .build();
+        return new TestResultsResponse(TestResultsData.builder()
+                .results(convertListTestResultToListCheckTestAnswersResultData(source))
+                .build());
     }
 
     /**
      * Конвертор
      *
      * @param source вхідний список
-     * @return List<CheckTestAnswersResultResponse> вихідний список
+     * @return List<CheckTestAnswersResultData> вихідний список
      */
-    private List<CheckTestAnswersResultResponse> convertListTestResultToListCheckTestAnswersResultResponse(List<TestResult> source) {
+    private List<CheckTestAnswersResultData> convertListTestResultToListCheckTestAnswersResultData(List<TestResult> source) {
         return source.stream()
-                .map(this::convertTestResultToCheckTestAnswersResultResponse)
+                .map(this::convertTestResultToCheckTestAnswersResultData)
                 .toList();
     }
 
@@ -41,10 +43,10 @@ public class TestResultListToTestResultsResponseResponse implements Converter<Li
      * Конвертор
      *
      * @param source вхідний об'єкт
-     * @return CheckTestAnswersResultResponse вихідний об'єкт
+     * @return CheckTestAnswersResultData вихідний об'єкт
      */
-    private CheckTestAnswersResultResponse convertTestResultToCheckTestAnswersResultResponse(TestResult source) {
-        return CheckTestAnswersResultResponse.builder()
+    private CheckTestAnswersResultData convertTestResultToCheckTestAnswersResultData(TestResult source) {
+        return CheckTestAnswersResultData.builder()
                 .currentAssessment(source.getAssessment())
                 .maxAssessment(source.getMaxAssessment())
                 .correctAnswers(this.convertStringToListAnswerView(source.getCorrect()))
