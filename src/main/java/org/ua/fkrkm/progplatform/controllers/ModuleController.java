@@ -47,6 +47,26 @@ public class ModuleController {
     }
 
     /**
+     * Отримати модуль по ID
+     *
+     * @param id ID модуля
+     * @return Response<ModuleResponse> відповідь API
+     */
+    @Operation(
+            summary = "Отримати модуль по ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ModuleResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "INTERNAL_SERVER_ERROR", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+    })
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{id}")
+    public Response<ModuleResponse> getModuleById(@Parameter(description = "ID модуля") @PathVariable Long id) {
+        return new Response<>(HttpStatus.OK, this.moduleService.getModuleById(id));
+    }
+
+    /**
      * Встановити пройдену тему модуля
      *
      * @param request інформація про модуль

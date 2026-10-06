@@ -11,10 +11,14 @@ import org.ua.fkrkm.proglatformdao.entity.ModuleStat;
 import org.ua.fkrkm.proglatformdao.entity.User;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleStateView;
 import org.ua.fkrkm.proglatformdao.entity.view.ModuleView;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformAccessDeniedException;
 import org.ua.fkrkm.progplatform.exceptions.ProgPlatformException;
 import org.ua.fkrkm.progplatform.services.AuthUserServiceI;
+import org.ua.fkrkm.progplatform.services.CourseServiceI;
 import org.ua.fkrkm.progplatformclientlib.request.*;
 import org.ua.fkrkm.progplatformclientlib.response.*;
+import org.ua.fkrkm.progplatform.exceptions.ErrorConsts;
+import org.ua.fkrkm.progplatform.exceptions.ProgPlatformNotFoundException;
 import org.ua.fkrkm.progplatform.services.ModuleServiceI;
 
 import java.math.BigDecimal;
@@ -37,8 +41,12 @@ public class ModuleServiceImpl implements ModuleServiceI {
     private final Converter<ModuleStat, SetModuleTopicCompletedResponse> createModuleCompleteResponseModuleStatConverter;
     // Конвертор
     private final Converter<Module, ModuleView> moduleToModuleViewConverter;
+    // Конвертор
+    private final Converter<ModuleView, ModuleResponse> moduleViewToModuleResponseConverter;
     // Сервіс для роботи з поточним користувачем в системі
     private final AuthUserServiceI authUserService;
+    // Сервіс для роботи з курсами
+    private final CourseServiceI courseService;
 
     /**
      * {@inheritDoc}
@@ -53,6 +61,27 @@ public class ModuleServiceImpl implements ModuleServiceI {
                 .peek((module) -> this.setModuleCompletePercent(module, moduleStateViews))
                 .toList();
         return new ModulesResponse(modules);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ModuleResponse getModuleById(Long moduleId) {
+        Module module = this.moduleDao.getById(moduleId).stream()
+                .findFirst()
+                .orElseThrow(() -> new ProgPlatformNotFoundException(ErrorConsts.MODULE_NOT_FOUND));
+
+        User authUser = this.authUserService.getCurrentAuthUser();
+
+        if (!this.courseService.checkIfUserExistsInCourse(module.getCourseId(), authUser.getId()))
+            throw new ProgPlatformAccessDeniedException(ErrorConsts.INSUFFICIENT_RIGHTS);
+
+        ModuleView moduleView = this.moduleToModuleViewConverter.convert(module);
+
+        List<ModuleStateView> moduleStateViews = this.moduleStatDao.findModulesStatByUserId(authUser.getId());
+        this.setModuleCompletePercent(moduleView, moduleStateViews);
+        return this.moduleViewToModuleResponseConverter.convert(moduleView);
     }
 
     /**
